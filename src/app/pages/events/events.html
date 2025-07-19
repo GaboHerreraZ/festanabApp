@@ -37,8 +37,13 @@
                     <p-sortIcon field="name" />
                 </th>
                 <th pSortableColumn="description" style="min-width: 12rem">
-                    Descripción
+                    Tipo de Evento
                     <p-sortIcon field="description" />
+                </th>
+
+                <th pSortableColumn="location" style="min-width: 12rem">
+                    Locación
+                    <p-sortIcon field="location" />
                 </th>
                 <th pSortableColumn="date" style="min-width: 8rem">
                     Fecha evento
@@ -57,6 +62,11 @@
                     <p-sortIcon field="phoneNumber" />
                 </th>
 
+                <th pSortableColumn="nit" style="min-width: 8rem">
+                    Cédula / Nit
+                    <p-sortIcon field="nit" />
+                </th>
+
                 <th style="min-width: 12rem"></th>
             </tr>
         </ng-template>
@@ -64,10 +74,13 @@
             <tr>
                 <td style="min-width: 12rem">{{ event.name }}</td>
                 <td style="min-width: 16rem">{{ event.description }}</td>
+                <td style="min-width: 16rem">{{ event.location }}</td>
                 <td style="min-width: 16rem">{{ event.date | date:'d \'de\' MMMM \'de\' y':'es' }}</td>
                 <td style="min-width: 16rem">{{ event.time | date:'h:mm a' }}</td>
                 <td style="min-width: 16rem">{{ event.owner }}</td>
                 <td style="min-width: 16rem">{{ event.phoneNumber }}</td>
+                <td style="min-width: 16rem">{{ event.nit }}</td>
+
                 <td>
                     <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editEvent(event)" />
                     <p-button icon="pi pi-pen-to-square" class="mr-2" [rounded]="true" [outlined]="true" (click)="goEventDetail(event)" />
@@ -86,16 +99,20 @@
                 </div>
 
                 <div>
-                    <label for="description" class="block font-bold mb-3">Descripción</label>
-                    <textarea class="w-full" rows="4" maxlength="100" cols="30" pTextarea [(ngModel)]="event.description"></textarea>
+                    <label for="description" class="block font-bold mb-3">Tipo de Evento</label>
+                    <input type="text" pInputText id="description" [(ngModel)]="event.description" required autofocus fluid />
                     <small class="text-red-500" *ngIf="submitted && !event.description">Descripción es requerido.</small>
+                </div>
+                <div>
+                    <label for="location" class="block font-bold mb-3">Locación</label>
+                    <input type="text" pInputText id="location" [(ngModel)]="event.location" required autofocus fluid />
+                    <small class="text-red-500" *ngIf="submitted && !event.location">Locación es requerida.</small>
                 </div>
 
                 <div class="grid grid-cols-12 gap-4">
                     <div class="col-span-6">
                         <label for="date" class="block font-bold mb-3">Fecha Evento</label>
                         <p-datepicker [(ngModel)]="event.date" [iconDisplay]="'input'" [showIcon]="true" inputId="icondisplay" id="date" />
-                        <small class="text-red-500" *ngIf="submitted && !event.date">Fecha del evento es requerido.</small>
                     </div>
                     <div class="col-span-6">
                         <label for="time" class="block font-bold mb-3">Hora Evento</label>
@@ -104,7 +121,6 @@
                                 <i class="pi pi-clock" (click)="clickCallBack($event)"></i>
                             </ng-template>
                         </p-datepicker>
-                        <small class="text-red-500" *ngIf="submitted && !event.time">Hora del evento es requerido.</small>
                     </div>
                 </div>
 
@@ -117,7 +133,11 @@
                 <div>
                     <label for="phoneNumber" class="block font-bold mb-3">Celular:</label>
                     <input type="text" pInputText id="phoneNumber" [(ngModel)]="event.phoneNumber" required autofocus fluid />
-                    <small class="text-red-500" *ngIf="submitted && !event.phoneNumber">Celular es requerido.</small>
+                </div>
+
+                <div>
+                    <label for="nit" class="block font-bold mb-3">Cédula / Nit:</label>
+                    <input type="text" pInputText id="nit" [(ngModel)]="event.nit" required autofocus fluid />
                 </div>
             </div>
         </ng-template>

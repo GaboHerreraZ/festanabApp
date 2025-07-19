@@ -5,6 +5,8 @@ export interface Event {
     phoneNumber?: number;
 
     description?: string;
+    nit?: string;
+    location?: string;
     date?: Date;
     time?: Date;
 }

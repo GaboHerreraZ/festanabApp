@@ -33,11 +33,17 @@
     <ng-template #content>
         <div class="flex flex-col gap-6">
             <div class="w-full">
-                <label for="name" class="block font-bold mb-3">Descripción</label>
+                <label for="name" class="block font-bold mb-3">Nombre</label>
                 <div class="flex flex-col w-full">
-                    <p-autocomplete [(ngModel)]="item.description" [disabled]="isItemDialogAdmin" [suggestions]="inventorySearch" [dropdown]="true" optionValue="name" optionLabel="name" (completeMethod)="search($event)" />
+                    <p-autocomplete [(ngModel)]="item.name" [disabled]="isItemDialogAdmin" [suggestions]="inventorySearch" [dropdown]="true" optionValue="name" optionLabel="name" (completeMethod)="search($event)" />
                 </div>
-                <small class="text-red-500" *ngIf="submitted && !item.description">Descripción es requerida.</small>
+                <small class="text-red-500" *ngIf="submitted && !item.name">Nombre es requerido.</small>
+            </div>
+
+            <div>
+                <label for="description" class="block font-bold mb-3">Descripción</label>
+                <input type="text" pInputText id="description" [(ngModel)]="item.description" required autofocus fluid />
+                <small class="text-red-500" *ngIf="submitted && !item.description">Description es requerida.</small>
             </div>
 
             <div class="col-span-6">

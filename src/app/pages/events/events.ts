@@ -73,7 +73,7 @@ export class Events {
         this.submitted = true;
         let _events = this.events();
 
-        if (!this.event.name?.trim() || !this.event.description || !this.event.date || !this.event.owner || !this.event.phoneNumber) {
+        if (!this.event.name?.trim() || !this.event.description || !this.event.owner || !this.event.phoneNumber) {
             return;
         }
 
@@ -112,7 +112,8 @@ export class Events {
     private loadData() {
         this.cols = [
             { field: 'name', header: 'Nombre' },
-            { field: 'description', header: 'Descripción' },
+            { field: 'description', header: 'Tipo de Evento' },
+            { field: 'location', header: 'Locación' },
             { field: 'date', header: 'Fecha evento' },
             { field: 'owner', header: 'Cliente' },
             { field: 'phoneNumber', header: 'Movil' }

@@ -19,6 +19,10 @@ export class EventsService {
         return this.apiService.get<Event[]>(`${this.PATH}/get-events`);
     }
 
+    getEvent(id: string) {
+        return this.apiService.get<Event[]>(`${this.PATH}/get-event-by-id/${id}`);
+    }
+
     addEditEvents(event: Event) {
         return this.apiService.post<Event>(`${this.PATH}/add-edit-event`, {
             _id: event._id || undefined,
@@ -27,6 +31,8 @@ export class EventsService {
             date: event.date,
             owner: event.owner,
             phoneNumber: event.phoneNumber,
+            nit: event.nit,
+            location: event.location,
             time: event.time
         });
     }

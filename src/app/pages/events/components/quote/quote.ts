@@ -22,10 +22,11 @@ import { Product } from '../../../../core/models/product';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { InputTextModule } from 'primeng/inputtext';
 
 @Component({
     selector: 'app-quote',
-    imports: [CommonModule, Table, FormsModule, ButtonModule, ConfirmDialogModule, RadioButtonModule, ToolbarModule, DialogModule, SelectModule, SelectButtonModule, ToastModule, AutoCompleteModule, InputNumberModule],
+    imports: [CommonModule, Table, FormsModule, ButtonModule, ConfirmDialogModule, RadioButtonModule, ToolbarModule, DialogModule, SelectModule, SelectButtonModule, ToastModule, AutoCompleteModule, InputNumberModule, InputTextModule],
     standalone: true,
     templateUrl: './quote.html',
     providers: [MessageService, ConfirmationService]
@@ -68,6 +69,7 @@ export class Quote implements OnInit {
 
     item: Item = {
         _id: '',
+        name: '',
         description: '',
         rentalPrice: 0,
         costPrice: 0,
@@ -77,6 +79,7 @@ export class Quote implements OnInit {
     tableSettings: TableSettings = {
         includesTotal: true,
         columns: [
+            { field: 'name', header: 'Nombre' },
             { field: 'description', header: 'Descripción' },
             { field: 'rentalPrice', header: 'Valor Alquiler' },
             { field: 'costPrice', header: 'Valor Costo' },
@@ -84,6 +87,12 @@ export class Quote implements OnInit {
         ],
         globalFiltes: ['name', 'description'],
         header: [
+            {
+                pipe: null,
+                id: 'name',
+                title: 'Nombre',
+                size: '16rem'
+            },
             {
                 pipe: null,
                 id: 'description',
@@ -183,7 +192,7 @@ export class Quote implements OnInit {
                                 const items = section.items.filter((i) => i._id !== data.data);
                                 return {
                                     ...event,
-                                    section: [...event.section.map((s) => (s._id === this.currentSectionId ? { ...s, items, footer: this.getFooterValues(items) } : s))]
+                                    section: [...event.section.map((s) => (s._id === this.currentSectionId ? { ...s, items, footer: this.getFooterValues(items, s.type) } : s))]
                                 };
                             }
                             return event;
@@ -226,12 +235,12 @@ export class Quote implements OnInit {
                             section = {
                                 ...section,
                                 items,
-                                footer: this.getFooterValues(items)
+                                footer: this.getFooterValues(items, section.type)
                             };
                         } else {
                             section = {
                                 ...section,
-                                footer: this.getFooterValues([...section.items, data.data]),
+                                footer: this.getFooterValues([...section.items, data.data], section.type),
                                 items: [...section.items, data.data]
                             };
                         }
@@ -301,7 +310,7 @@ export class Quote implements OnInit {
                     event.section = event.section.map((section: Section) => {
                         return {
                             ...section,
-                            footer: this.getFooterValues(section.items)
+                            footer: this.getFooterValues(section.items, section.type)
                         };
                     });
                     return event;
@@ -339,17 +348,21 @@ export class Quote implements OnInit {
         });
     }
 
-    private getFooterValues(items: Item[]) {
+    private getFooterValues(items: Item[], type: string): FooterValues {
         const footer: FooterValues = {} as FooterValues;
+        const isAdmin = type === 'admin';
         const totalRentalPrice = items.reduce((acc, item) => acc + item.rentalPrice, 0);
         const totalCostPrice = items.reduce((acc, item) => acc + item.costPrice, 0);
-        footer.size = '1';
+        footer.size = isAdmin ? '1' : '2';
         footer.values = [
             { id: 'rentalPrice', value: totalRentalPrice, pipe: 'price' },
-            { id: 'costPrice', value: totalCostPrice, pipe: 'price' },
-            { id: 'empty1', value: 0, pipe: 'number' },
-            { id: 'empty2', value: 0, pipe: 'number' }
+            { id: 'empty1', value: 0, pipe: 'number' }
         ];
+
+        if (!isAdmin) {
+            footer.values.push({ id: 'costPrice', value: totalCostPrice, pipe: 'price' }, { id: 'empty3', value: 0, pipe: 'number' }, { id: 'empty2', value: 0, pipe: 'number' });
+        }
+
         return footer;
     }
 }

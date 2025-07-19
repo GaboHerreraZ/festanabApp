@@ -36,7 +36,7 @@ export class Bills implements OnInit {
     bill = {
         date: new Date(),
         value: 0,
-        conciliation: true
+        conciliation: false
     } as Bill;
 
     footerValues: Signal<FooterValues> = computed(() => {
@@ -268,6 +268,12 @@ export class Bills implements OnInit {
                     detail: 'Gasto guardado correctamente.',
                     life: 3000
                 });
+
+                this.bill = {
+                    date: new Date(),
+                    value: 0,
+                    conciliation: false
+                } as Bill;
 
                 this.eventService.eventId$.set('');
                 this.eventService.eventId$.set(this.eventId());

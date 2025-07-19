@@ -1,0 +1,76 @@
+<div class="grid items-center justify-center w-full mt-10 p-4">
+    <div class="card flex flex-col md:flex-row items-center md:items-start justify-between w-full gap-6 md:gap-12 p-6 bg-white rounded-xl shadow-md">
+        <!-- Imagen: primero en móvil, segundo en escritorio -->
+        <img src="assets/images/festanab.png" class="w-40 md:w-60 object-contain order-1 md:order-2" alt="Festanab Logo" />
+
+        <!-- Texto: segundo en móvil, primero en escritorio -->
+        <div class="flex-1 text-sm md:text-base order-2 md:order-1">
+            <div class="mb-3">
+                <span class="font-bold text-xl mr-2">Nombre:</span>
+                <span class="font-medium text-xl">{{ event.owner }}</span>
+            </div>
+
+            <div class="mb-3">
+                <span class="font-bold mr-2 text-xl">Tipo de Evento:</span>
+                <span class="font-medium text-xl">{{ event.description }}</span>
+            </div>
+
+            <div class="mb-3">
+                <span class="font-bold mr-2 text-xl">Fecha del Evento:</span>
+                <span class="font-medium mr-2 text-xl"> {{ event.date | date: 'd \'de\' MMMM \'de\' y':'es' }} </span>
+                <span class="font-medium text-xl">{{ event.time | date: 'h:mm a' }}</span>
+            </div>
+
+            <div class="mb-3">
+                <span class="font-bold mr-2 text-xl">Locación:</span>
+                <span class="font-medium text-xl">{{ event.location }}</span>
+            </div>
+
+            <div class="mb-3">
+                <span class="font-bold mr-2 text-xl">Cédula / Nit:</span>
+                <span class="font-medium text-xl">{{ event.nit }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid">
+        @for(section of sections; track section._id){
+        <p-panel [header]="section.name" [toggleable]="true" class="text-2xl">
+            @for(item of section.items; track item._id){
+            <div class="flex items-center my-2">
+                <i class="pi font-bold pi-check mr-2"></i>
+                <p class="m-0 text-xl">{{item.description}}</p>
+            </div>
+            }
+        </p-panel>
+        }
+    </div>
+
+    <div class="card mt-8">
+        <h2 class="text-2xl">Costo Total</h2>
+        <label class="font-bold text-4xl">{{event.totalRentalPrice | currency: 'COP':'symbol':'1.0-0'}}</label>
+    </div>
+
+    <div class="card flex md:flex-row flex-col justify-between">
+        <div class="grid md:w-1/2 w-full">
+            <span class="font-bold text-xl">!RESERVA TU EVENTO!</span>
+            <p class="text-lg">con mínimo 10 dúas de antelación, realizando un abono del <span class="font-bold">30%</span> al <span class="font-bold">50%</span> del costo total.</p>
+        </div>
+
+        <div class="grid md:w-1/2 w-full mt-5 md:mt-0">
+            <span class="font-bold text-xl">ESTE VALOR INCLUYE</span>
+            <div class="flex items-center my-2">
+                <i class="pi font-bold pi-check mr-2"></i>
+                <p class="m-0 text-xl">Desplazamiento de mobiliario.</p>
+            </div>
+            <div class="flex items-center my-2">
+                <i class="pi font-bold pi-check mr-2"></i>
+                <p class="m-0 text-xl">Instalaciónn y desmontaje.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <span class="text-xl font-bold">!GRACIAS POR CONFIAR EN NUESTRO SERVICIO!</span>
+    </div>
+</div>

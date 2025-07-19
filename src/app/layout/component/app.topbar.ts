@@ -15,7 +15,7 @@ import { LayoutService } from '../service/layout.service';
                 <i class="pi pi-bars"></i>
             </button>
             <a class="layout-topbar-logo" routerLink="/">
-                <span>Festanab</span>
+                <img src="assets/images/festanab.png" alt="Festanab" class="w-20" />
             </a>
         </div>
 

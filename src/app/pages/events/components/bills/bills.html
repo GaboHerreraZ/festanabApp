@@ -1,0 +1,77 @@
+<div class="mt-5 card">
+    <div class="font-semibold text-xl mb-4">Gastos</div>
+    <p-toolbar styleClass="mb-6">
+        <ng-template #start>
+            <p-button label="Nuevo Gasto" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew(null)" />
+        </ng-template>
+    </p-toolbar>
+    <app-table [parentId]="''" [tableSettings]="tableSettings" [footerValues]="footerValues()" [title]="'Administrar Gastos'" [data]="bills()" />
+</div>
+
+<p-dialog [(visible)]="billDialog" [style]="{ width: '450px' }" header="Detalle del Gasto" [modal]="true">
+    <ng-template #content>
+        <div class="flex flex-col gap-6">
+            <div class="w-full"></div>
+
+            <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-6">
+                    <label for="date" class="block font-bold mb-3">Fecha del Gasto</label>
+                    <p-datepicker class="w-[500px]" [(ngModel)]="bill.date" [iconDisplay]="'input'" [showIcon]="true" inputId="icondisplay" id="date" />
+                    <small class="text-red-500" *ngIf="submitted && !bill.date">Fecha del Gasto es requerido.</small>
+                </div>
+                <div class="col-span-6">
+                    <label for="value" class="block font-bold mb-3">Valor</label>
+                    <p-inputnumber id="value" [(ngModel)]="bill.value" mode="currency" [minFractionDigits]="0" currency="COP" fluid />
+                    <small class="text-red-500" *ngIf="submitted && !bill.value">Valor del gasto es requerido.</small>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-9">
+                    <label for="name" class="block font-bold mb-3">Concepto</label>
+                    <input type="text" pInputText id="name" [(ngModel)]="bill.name" required autofocus fluid />
+                    <small class="text-red-500" *ngIf="submitted && !bill.name">Concepto es requerido.</small>
+                </div>
+                <div class="col-span-3 flex justify-center items-center">
+                    <div class="flex flex-col justify-center items-center">
+                        <label for="conciliation" class="font-bold"> Conciliación </label>
+                        <p-checkbox inputId="conciliation" name="conciliation" [binary]="true" [(ngModel)]="bill.conciliation" />
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label for="paymentType" class="block font-bold mb-3">Tipo de Pago</label>
+                <p-select [options]="paymentTypes" name="paymentType" [(ngModel)]="bill.paymentType" [checkmark]="true" optionLabel="value" optionValue="value" [showClear]="true" placeholder="Seleccionar tipo de pago" class="w-full" />
+                <small class="text-red-500" *ngIf="submitted && !bill.paymentType">Tipo de pago es requerido.</small>
+            </div>
+
+            @if(bill.paymentType === 'Transferencia') {
+            <div>
+                <label for="paymentCompany" class="block font-bold mb-3">Medio de Pago</label>
+                <p-select [options]="paymentCompany" name="paymentCompany" [(ngModel)]="bill.paymentCompany" [checkmark]="true" optionLabel="value" optionValue="value" [showClear]="true" placeholder="Seleccionar medio de pago" class="w-full" />
+                <small class="text-red-500" *ngIf="submitted && !bill.paymentCompany">Medio de pago es requerido.</small>
+            </div>
+            }
+
+            <div>
+                <label for="billType" class="block font-bold mb-3">Tipo de Gasto</label>
+                <p-select [options]="billType" name="billType" [(ngModel)]="bill.billType" [checkmark]="true" optionLabel="value" optionValue="value" [showClear]="true" placeholder="Seleccionar tipo de gasto" class="w-full" />
+            </div>
+
+            <div>
+                <label for="observations" class="block font-bold mb-3">Observaciones</label>
+                <textarea class="w-full" rows="4" maxlength="100" cols="30" pTextarea [(ngModel)]="bill.observations"></textarea>
+            </div>
+        </div>
+    </ng-template>
+
+    <ng-template #footer>
+        <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
+        <p-button label="Guardar" icon="pi pi-check" (click)="saveItem()" />
+    </ng-template>
+</p-dialog>
+
+<p-toast />
+
+<p-confirmdialog [style]="{ width: '450px' }" />

@@ -1,0 +1,63 @@
+<p-toast />
+
+<div class="flex flex-wrap gap-4">
+    <!-- Daytime Overtime Hour -->
+    <div class="flex flex-col flex-1 min-w-[250px]">
+        <label for="daytimeOvertimeHour" class="block font-bold mb-3">Recargo Hora Extra Diurna</label>
+        <p-inputnumber id="daytimeOvertimeHour" [(ngModel)]="setting.daytimeOvertimeHour" fluid suffix="%" />
+        <small class="text-red-500" *ngIf="submitted && !setting.daytimeOvertimeHour">Campo requerido</small>
+    </div>
+
+    <!-- Regular Nighttime Hour -->
+    <div class="flex flex-col flex-1 min-w-[250px]">
+        <label for="regularNighttimeHour" class="block font-bold mb-3">Recargo Nocturno</label>
+        <p-inputnumber id="regularNighttimeHour" [(ngModel)]="setting.regularNighttimeHour" fluid suffix="%" />
+        <small class="text-red-500" *ngIf="submitted && !setting.regularNighttimeHour">Campo requerido</small>
+    </div>
+
+    <!-- Nighttime Overtime Hour -->
+    <div class="flex flex-col flex-1 min-w-[250px]">
+        <label for="nighttimeOvertimeHour" class="block font-bold mb-3">Hora Extra Nocturna</label>
+        <p-inputnumber id="nighttimeOvertimeHour" [(ngModel)]="setting.nighttimeOvertimeHour" fluid suffix="%" />
+        <small class="text-red-500" *ngIf="submitted && !setting.nighttimeOvertimeHour">Campo requerido</small>
+    </div>
+
+    <!-- Sunday and Holiday Hour -->
+    <div class="flex flex-col flex-1 min-w-[250px]">
+        <label for="sundayAndHolidayHour" class="block font-bold mb-3">Hora Dominicales y Festivos</label>
+        <p-inputnumber id="sundayAndHolidayHour" [(ngModel)]="setting.sundayAndHolidayHour" fluid suffix="%" />
+        <small class="text-red-500" *ngIf="submitted && !setting.sundayAndHolidayHour">Campo requerido</small>
+    </div>
+
+    <!-- Daytime Overtime Sunday/Holiday -->
+    <div class="flex flex-col flex-1 min-w-[250px]">
+        <label for="daytimeOvertimeSundayHoliday" class="block font-bold mb-3">Hora Extra Diurna Dominicales y Festivos</label>
+        <p-inputnumber id="daytimeOvertimeSundayHoliday" [(ngModel)]="setting.daytimeOvertimeSundayHoliday" fluid suffix="%" />
+        <small class="text-red-500" *ngIf="submitted && !setting.daytimeOvertimeSundayHoliday">Campo requerido</small>
+    </div>
+
+    <div class="flex flex-col flex-1 min-w-[250px]">
+        <label for="nightWorkSundayHoliday" class="block font-bold mb-3">Hora Nocturno Dominical o Festivo</label>
+        <p-inputnumber id="nightWorkSundayHoliday" [(ngModel)]="setting.nightWorkSundayHoliday" fluid suffix="%" />
+        <small class="text-red-500" *ngIf="submitted && !setting.nightWorkSundayHoliday">Campo requerido</small>
+    </div>
+
+    <!-- Nighttime Overtime Sunday/Holiday -->
+    <div class="flex flex-col flex-1 min-w-[250px]">
+        <label for="nighttimeOvertimeSundayHoliday" class="block font-bold mb-3">Hora Extra Nocturna Dominicales y Festivos</label>
+        <p-inputnumber id="nighttimeOvertimeSundayHoliday" [(ngModel)]="setting.nighttimeOvertimeSundayHoliday" fluid suffix="%" />
+        <small class="text-red-500" *ngIf="submitted && !setting.nighttimeOvertimeSundayHoliday">Campo requerido</small>
+    </div>
+
+    <!-- Night Work on Sunday/Holiday -->
+
+    <div class="flex flex-col flex-1 min-w-[250px]">
+        <label for="auxiliaryTrasport" class="block font-bold mb-3">Auxilio Transporte</label>
+        <p-inputnumber id="auxiliaryTrasport" [(ngModel)]="setting.auxiliaryTrasport" mode="currency" [minFractionDigits]="0" currency="COP" fluid />
+        <small class="text-red-500" *ngIf="submitted && !setting.auxiliaryTrasport">Campo requerido</small>
+    </div>
+</div>
+
+<div class="flex justify-end mt-4">
+    <p-button label="Guardar" icon="pi pi-check" (click)="saveSettings()" />
+</div>

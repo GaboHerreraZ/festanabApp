@@ -1,0 +1,74 @@
+<p-table
+    #dt
+    [value]="data"
+    [rows]="10"
+    [columns]="tableSettings.columns"
+    [paginator]="true"
+    [globalFilterFields]="tableSettings.globalFiltes"
+    [tableStyle]="{ 'min-width': '75rem' }"
+    [rowHover]="true"
+    dataKey="id"
+    currentPageReportTemplate="Mostrando {first} hasta {last} de {totalRecords} registros"
+    [showCurrentPageReport]="true"
+    [rowsPerPageOptions]="[10, 20, 30]"
+>
+    <ng-template #caption>
+        <div class="flex items-center justify-between">
+            <h5 class="m-0">{{title}}</h5>
+            <p-iconfield>
+                <p-inputicon styleClass="pi pi-search" />
+                <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />
+            </p-iconfield>
+        </div>
+    </ng-template>
+    <ng-template #header>
+        <tr>
+            @for(header of tableSettings.header; track header.id) {
+            <th pSortableColumn="{{header.id}}" [style.minWidth]="header.size">
+                {{ header.title }}
+                <p-sortIcon field="{{header.id}}" />
+            </th>
+            }
+            <th style="min-width: 12rem"></th>
+        </tr>
+    </ng-template>
+    <ng-template #body let-item>
+        <tr>
+            @for(header of tableSettings.header; track header.id) { @if(!header.pipe && !header.type ) {
+            <td [style.minWidth]="header.size">{{ item[header.id] }}</td>
+            } @if(header.pipe === 'price' && !header.type ) {
+            <td [style.minWidth]="header.size">{{ item[header.id] | currency: 'COP':'symbol':'1.0-0' }}</td>
+
+            } @if(header.pipe === 'date' && !header.type ) {
+            <td [style.minWidth]="header.size">{{ item[header.id] | date:'d \'de\' MMMM \'de\' y':'es' }}</td>
+            } @if(header.type === 'boolean' ) {
+            <td [style.minWidth]="header.size">
+                <p-checkbox [ngModel]="item[header.id]" [binary]="true" disabled="true" variant="filled" />
+            </td>
+
+            } @if(header.pipe === 'time' && !header.type ) {
+            <td [style.minWidth]="header.size">{{ item[header.id] | date:'h:mm a' }}</td>
+            } }
+
+            <!--   <td style="min-width: 12rem">{{ product.name }}</td>
+            <td style="min-width: 16rem">{{ product.quantity }}</td>
+            <td>{{ product.rentalPrice | currency: 'COP':'symbol':'1.0-0' }}</td> -->
+
+            <td>
+                @for(action of tableSettings.actions; track action.id) {
+                <p-button [icon]="action.icon" class="mr-2" [rounded]="true" [outlined]="true" (click)="action.action({sectionId: parentId, item})" />
+                }
+            </td>
+        </tr>
+    </ng-template>
+    @if(tableSettings.includesTotal && footerValues) {
+    <ng-template #footer>
+        <tr>
+            <td [attr.colspan]="footerValues.size" class="text-right font-bold p-3 pb-0">Total</td>
+            @for(row of footerValues.values; track row.id) {
+            <td class="font-bold p-3 pb-0">{{ row.id.includes('empty') ? '': row.pipe === 'number' ? row.value : row.value | currency: 'COP':'symbol':'1.0-0' }}</td>
+            }
+        </tr>
+    </ng-template>
+    }
+</p-table>

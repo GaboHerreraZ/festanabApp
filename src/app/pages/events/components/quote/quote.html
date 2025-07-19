@@ -1,0 +1,79 @@
+<div class="font-semibold text-xl mb-4 mt-5">Agregar Seccion</div>
+<p-toast />
+
+<div class="mt-2 flex flex-row gap-4">
+    <p-select [options]="sections()" [(ngModel)]="selectedSection" [checkmark]="true" optionLabel="module" [showClear]="true" placeholder="Seleccionar sección" class="w-full md:w-56" />
+    <p-button label="Agregar" icon="pi pi-plus" severity="secondary" class="mr-2" [disabled]="!selectedSection" (onClick)="saveSection()" />
+</div>
+
+@for(section of clientSections(); track section._id) {
+
+<div class="mt-5 card">
+    <div class="font-semibold text-xl mb-4">{{section.name}}</div>
+    <p-toolbar styleClass="mb-6">
+        <ng-template #start>
+            <p-button label="Nuevo Item" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew(section._id, null)" />
+        </ng-template>
+    </p-toolbar>
+    <app-table [parentId]="section._id" [tableSettings]="tableSettings" [footerValues]="section.footer" [title]="'Administrar'" [data]="section.items" />
+</div>
+} @for(section of adminSections(); track section._id) {
+<div class="mt-5 card">
+    <div class="font-semibold text-xl mb-4">{{section.name}}</div>
+    <!-- <p-toolbar styleClass="mb-6">
+        <ng-template #start>
+            <p-button label="Nuevo item" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew(section._id, null)" />
+        </ng-template>
+    </p-toolbar> -->
+    <app-table [parentId]="section._id" [tableSettings]="tableAdminSettings" [footerValues]="section.footer" [title]="'Administrar'" [data]="section.items" />
+</div>
+}
+
+<p-dialog [(visible)]="itemDialog" [style]="{ width: '450px' }" header="Detalle del Item" [modal]="true">
+    <ng-template #content>
+        <div class="flex flex-col gap-6">
+            <div class="w-full">
+                <label for="name" class="block font-bold mb-3">Descripción</label>
+                <div class="flex flex-col w-full">
+                    <p-autocomplete [(ngModel)]="item.description" [disabled]="isItemDialogAdmin" [suggestions]="inventorySearch" [dropdown]="true" optionValue="name" optionLabel="name" (completeMethod)="search($event)" />
+                </div>
+                <small class="text-red-500" *ngIf="submitted && !item.description">Descripción es requerida.</small>
+            </div>
+
+            <div class="col-span-6">
+                <label for="price" class="block font-bold mb-3">Valor Alquiler</label>
+                <p-inputnumber id="price" [(ngModel)]="item.rentalPrice" mode="currency" [minFractionDigits]="0" currency="COP" fluid />
+                <small class="text-red-500" *ngIf="submitted && !item.rentalPrice">Valor Alquiler es requerido.</small>
+            </div>
+
+            @if(!isItemDialogAdmin){
+
+            <div class="col-span-6">
+                <label for="price" class="block font-bold mb-3">Valor Costo</label>
+                <p-inputnumber id="price" [(ngModel)]="item.costPrice" mode="currency" [minFractionDigits]="0" currency="COP" fluid />
+            </div>
+
+            <label for="price" class="block font-bold">Propietario</label>
+
+            <div class="flex flex-wrap gap-4">
+                <div class="flex items-center">
+                    <p-radiobutton name="propio" value="Propio" [(ngModel)]="item.owner" inputId="propio" />
+                    <label for="propio" class="ml-2">Propio</label>
+                </div>
+
+                <div class="flex items-center">
+                    <p-radiobutton name="Tercero" value="Tercero" [(ngModel)]="item.owner" inputId="Tercero" />
+                    <label for="Tercero" class="ml-2">Tercero</label>
+                </div>
+            </div>
+            }
+        </div>
+    </ng-template>
+
+    <ng-template #footer>
+        <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
+        <p-button label="Guardar" icon="pi pi-check" (click)="saveItem()" />
+    </ng-template>
+</p-dialog>
+
+<p-confirmdialog [style]="{ width: '450px' }" />

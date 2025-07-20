@@ -5,6 +5,8 @@
 
         <!-- Texto: segundo en móvil, primero en escritorio -->
         <div class="flex-1 text-sm md:text-base order-2 md:order-1">
+            <h2 class="font-bold text-4xl mb-4">Cotización</h2>
+
             <div class="mb-3">
                 <span class="font-bold text-xl mr-2">Nombre:</span>
                 <span class="font-medium text-xl">{{ event.owner }}</span>
@@ -70,7 +72,32 @@
         </div>
     </div>
 
-    <div class="card">
+    <div class="card grid">
         <span class="text-xl font-bold">!GRACIAS POR CONFIAR EN NUESTRO SERVICIO!</span>
+
+        <span class="text-md font-bold mt-20">Nicolas Alvarez</span>
+        <span class="text-sm">Director Creativo</span>
+    </div>
+
+    <div class="card">
+        <h1 class="text-4xl font-bold text-center">FORMAS DE PAGO</h1>
+        <div class="flex justify-center mt-10">
+            <img src="assets/images/bancolombia.svg" alt="Bancolombia" />
+            <div>
+                <p class="m-0"><span class="font-bold text-md">Cuenta de Ahorros:</span> # 49600018760</p>
+                <p class="font-bold m-0 text-md">ROSAIRIS BELEÑO</p>
+                <p class="font-bold m-0 text-md">CC: 26766863</p>
+            </div>
+        </div>
+        <p-divider />
+
+        <div class="flex justify-center mt-10">
+            <img src="assets/images/nequi.svg" alt="Bancolombia" />
+            <div class="ml-5">
+                <p class="m-0 font-bold">302 224 8159</p>
+                <p class="font-bold m-0 text-md">NICOLAS ALVAREZ</p>
+                <p class="font-bold m-0 text-md">CC: 1096250535</p>
+            </div>
+        </div>
     </div>
 </div>

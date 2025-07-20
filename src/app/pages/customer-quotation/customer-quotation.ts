@@ -4,10 +4,11 @@ import { EventsService } from '../events/events.service';
 import { ActivatedRoute } from '@angular/router';
 import { combineLatest } from 'rxjs';
 import { PanelModule } from 'primeng/panel';
+import { DividerModule } from 'primeng/divider';
 
 @Component({
     selector: 'app-customer-quotation',
-    imports: [CommonModule, PanelModule],
+    imports: [CommonModule, PanelModule, DividerModule],
     standalone: true,
     templateUrl: './customer-quotation.html'
 })
@@ -41,9 +42,6 @@ export class CustomerQuotation implements OnInit {
             console.log(detail);
             this.sections = detail.data.section.filter((item: any) => item.type === 'client');
             this.event = event.data;
-
-            console.log('Event Detail:', this.sections);
-            console.log('Event:', this.event);
         });
     }
 }

@@ -54,7 +54,9 @@ export class EventDetail implements OnInit {
         });
     }
 
-    goClientQuote() {}
+    goClientQuote() {
+        this.router.navigate(['/customer-quotation', this.eventService.eventId$()]);
+    }
 
     private getEventDetail(id: string) {
         if (!id) {

@@ -36,7 +36,7 @@ import { ToastModule } from 'primeng/toast';
                             <label for="password1" class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">Contraseña</label>
                             <p-password id="password1" [(ngModel)]="password" placeholder="Contraseña" [toggleMask]="true" styleClass="mb-4" [fluid]="true" [feedback]="false"></p-password>
 
-                            <p-button label="Sign In" styleClass="w-full" [disabled]="!password || !email" (onClick)="singIn()"></p-button>
+                            <p-button label="Iniciar Sesión" styleClass="w-full" [disabled]="!password || !email" (onClick)="singIn()"></p-button>
                         </div>
                     </div>
                 </div>

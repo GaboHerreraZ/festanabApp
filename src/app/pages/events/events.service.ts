@@ -26,11 +26,9 @@ export class EventsService {
     addEditEvents(event: Event) {
         return this.apiService.post<Event>(`${this.PATH}/add-edit-event`, {
             _id: event._id || undefined,
-            name: event.name,
             description: event.description,
             date: event.date,
             owner: event.owner,
-            phoneNumber: event.phoneNumber,
             nit: event.nit,
             location: event.location,
             time: event.time
@@ -46,6 +44,7 @@ export class EventsService {
     }
 
     saveItemSection(eventId: string, sectionId: string, item: Item) {
+        console.log('item', item);
         return this.apiService.post(`${this.PATH}/event-detail/${eventId}/section/${sectionId}/item`, { ...item });
     }
 
@@ -83,5 +82,13 @@ export class EventsService {
 
     deleteHour(hourId: string) {
         return this.apiService.delete(`${this.PATH}/delete-hour/${hourId}`);
+    }
+
+    editSectionDescription(eventId: string, sectionId: string, description: string) {
+        return this.apiService.post(`${this.PATH}/edit-section`, { eventId, sectionId, description });
+    }
+
+    updateAiuSection(sectionId: string, items: any[]) {
+        return this.apiService.post(`${this.PATH}/update-aiu-section`, { sectionId, items });
     }
 }

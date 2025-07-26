@@ -55,9 +55,9 @@
             <td>{{ product.rentalPrice | currency: 'COP':'symbol':'1.0-0' }}</td> -->
 
             <td>
-                @for(action of tableSettings.actions; track action.id) {
+                @if(!item['disabled']) { @for(action of tableSettings.actions; track action.id) {
                 <p-button [icon]="action.icon" class="mr-2" [rounded]="true" [outlined]="true" (click)="action.action({sectionId: parentId, item})" />
-                }
+                } }
             </td>
         </tr>
     </ng-template>

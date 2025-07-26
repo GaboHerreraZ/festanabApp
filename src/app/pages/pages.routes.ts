@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { Crud } from './crud/crud';
 import { Inventory } from './inventory/inventory';
 import { Employee } from './employee/employee';
 import { Settings } from './settings/settings';
@@ -8,11 +7,12 @@ import { EventDetail } from './events/components/event-detail/event-detail';
 import { Quote } from './events/components/quote/quote';
 import { Bills } from './events/components/bills/bills';
 import { Labour } from './events/components/labour/labour';
+import { Customer } from './customer/customer';
 
 export default [
-    { path: 'crud', component: Crud },
     { path: 'inventory', component: Inventory },
     { path: 'employees', component: Employee },
+    { path: 'customers', component: Customer },
     { path: 'settings', component: Settings },
     {
         path: 'events',

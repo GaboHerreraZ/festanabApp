@@ -1,0 +1,33 @@
+<p-toast />
+<div class="card">
+    <div class="font-semibold text-xl mb-4">Clientes</div>
+    <p-toolbar styleClass="mb-6">
+        <ng-template #start>
+            <p-button label="Agregar Cliente" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+        </ng-template>
+    </p-toolbar>
+    <app-table [parentId]="''" [tableSettings]="tableSettings" [title]="'Administrar Clientes'" [data]="customers()" />
+</div>
+
+<p-dialog [(visible)]="customerDialog" [style]="{ width: '450px' }" header="Detalle del Cliente" [modal]="true">
+    <ng-template #content>
+        <div class="flex flex-col gap-6">
+            <div>
+                <label for="name" class="block font-bold mb-3">Nombre</label>
+                <input type="text" pInputText id="name" [(ngModel)]="customer.name" required autofocus fluid />
+                <small class="text-red-500" *ngIf="submitted && !customer.name">Nombre es requerido.</small>
+            </div>
+
+            <div>
+                <label for="nit" class="block font-bold mb-3">Cédula / Nit</label>
+                <input type="text" pInputText id="nit" [(ngModel)]="customer.nit" required autofocus fluid />
+                <small class="text-red-500" *ngIf="submitted && !customer.nit">Cédula / Nit es requerida.</small>
+            </div>
+        </div>
+    </ng-template>
+
+    <ng-template #footer>
+        <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
+        <p-button label="Guardar" icon="pi pi-check" (click)="saveCustomer()" />
+    </ng-template>
+</p-dialog>

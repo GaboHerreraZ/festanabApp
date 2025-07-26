@@ -1,3 +1,4 @@
+<p-toast />
 <div class="card">
     <div class="font-semibold text-2xl mb-4">Eventos</div>
 
@@ -13,7 +14,7 @@
         [rows]="10"
         [columns]="cols"
         [paginator]="true"
-        [globalFilterFields]="['name', 'description', 'owner', 'phoneNumber']"
+        [globalFilterFields]="['description', 'owner']"
         [tableStyle]="{ 'min-width': '75rem' }"
         [rowHover]="true"
         dataKey="id"
@@ -32,9 +33,13 @@
         </ng-template>
         <ng-template #header>
             <tr>
-                <th pSortableColumn="name" style="min-width: 16rem">
-                    Nombre
-                    <p-sortIcon field="name" />
+                <th pSortableColumn="owner" style="min-width: 8rem">
+                    Cliente
+                    <p-sortIcon field="owner" />
+                </th>
+                <th pSortableColumn="nit" style="min-width: 8rem">
+                    Cédula / Nit
+                    <p-sortIcon field="nit" />
                 </th>
                 <th pSortableColumn="description" style="min-width: 12rem">
                     Tipo de Evento
@@ -53,34 +58,18 @@
                     Hora
                     <p-sortIcon field="time" />
                 </th>
-                <th pSortableColumn="owner" style="min-width: 8rem">
-                    Cliente
-                    <p-sortIcon field="owner" />
-                </th>
-                <th pSortableColumn="phoneNumber" style="min-width: 8rem">
-                    Celular
-                    <p-sortIcon field="phoneNumber" />
-                </th>
-
-                <th pSortableColumn="nit" style="min-width: 8rem">
-                    Cédula / Nit
-                    <p-sortIcon field="nit" />
-                </th>
 
                 <th style="min-width: 12rem"></th>
             </tr>
         </ng-template>
         <ng-template #body let-event>
             <tr>
-                <td style="min-width: 12rem">{{ event.name }}</td>
+                <td style="min-width: 16rem">{{ event.owner }}</td>
+                <td style="min-width: 16rem">{{ event.nit }}</td>
                 <td style="min-width: 16rem">{{ event.description }}</td>
                 <td style="min-width: 16rem">{{ event.location }}</td>
                 <td style="min-width: 16rem">{{ event.date | date:'d \'de\' MMMM \'de\' y':'es' }}</td>
                 <td style="min-width: 16rem">{{ event.time | date:'h:mm a' }}</td>
-                <td style="min-width: 16rem">{{ event.owner }}</td>
-                <td style="min-width: 16rem">{{ event.phoneNumber }}</td>
-                <td style="min-width: 16rem">{{ event.nit }}</td>
-
                 <td>
                     <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editEvent(event)" />
                     <p-button icon="pi pi-pen-to-square" class="mr-2" [rounded]="true" [outlined]="true" (click)="goEventDetail(event)" />
@@ -93,9 +82,14 @@
         <ng-template #content>
             <div class="flex flex-col gap-6">
                 <div>
-                    <label for="name" class="block font-bold mb-3">Nombre</label>
-                    <input type="text" pInputText id="name" [(ngModel)]="event.name" required autofocus fluid />
-                    <small class="text-red-500" *ngIf="submitted && !event.name">Nombre es requerido.</small>
+                    <label for="owner" class="block font-bold mb-3">Cliente</label>
+                    <input type="text" pInputText id="owner" [(ngModel)]="event.owner" required autofocus fluid />
+                    <small class="text-red-500" *ngIf="submitted && !event.owner">Cliente es requerido.</small>
+                </div>
+
+                <div>
+                    <label for="nit" class="block font-bold mb-3">Cédula / Nit:</label>
+                    <input type="text" pInputText id="nit" [(ngModel)]="event.nit" required autofocus fluid />
                 </div>
 
                 <div>
@@ -112,32 +106,16 @@
                 <div class="grid grid-cols-12 gap-4">
                     <div class="col-span-6">
                         <label for="date" class="block font-bold mb-3">Fecha Evento</label>
-                        <p-datepicker [(ngModel)]="event.date" [iconDisplay]="'input'" [showIcon]="true" inputId="icondisplay" id="date" />
+                        <p-datepicker [(ngModel)]="event.date" [iconDisplay]="'input'" [appendTo]="'body'" [showIcon]="true" inputId="icondisplay" id="date" />
                     </div>
                     <div class="col-span-6">
                         <label for="time" class="block font-bold mb-3">Hora Evento</label>
-                        <p-datepicker class="w-full" [(ngModel)]="event.time" [iconDisplay]="'input'" [showIcon]="true" id="time" [timeOnly]="true" inputId="templatedisplay">
+                        <p-datepicker class="w-full" [(ngModel)]="event.time" [iconDisplay]="'input'" [appendTo]="'body'" [showIcon]="true" id="time" [timeOnly]="true" inputId="templatedisplay">
                             <ng-template #inputicon let-clickCallBack="clickCallBack">
                                 <i class="pi pi-clock" (click)="clickCallBack($event)"></i>
                             </ng-template>
                         </p-datepicker>
                     </div>
-                </div>
-
-                <div>
-                    <label for="owner" class="block font-bold mb-3">Cliente</label>
-                    <input type="text" pInputText id="owner" [(ngModel)]="event.owner" required autofocus fluid />
-                    <small class="text-red-500" *ngIf="submitted && !event.owner">Cliente es requerido.</small>
-                </div>
-
-                <div>
-                    <label for="phoneNumber" class="block font-bold mb-3">Celular:</label>
-                    <input type="text" pInputText id="phoneNumber" [(ngModel)]="event.phoneNumber" required autofocus fluid />
-                </div>
-
-                <div>
-                    <label for="nit" class="block font-bold mb-3">Cédula / Nit:</label>
-                    <input type="text" pInputText id="nit" [(ngModel)]="event.nit" required autofocus fluid />
                 </div>
             </div>
         </ng-template>

@@ -16,6 +16,10 @@ export class InventoryService {
         return this.apiService.get<Product[]>(`${this.PATH}/get-inventory`);
     }
 
+    getItemInventoryByName(name: string) {
+        return this.apiService.get<Product[]>(`${this.PATH}/get-inventory-by-name/${encodeURIComponent(name)}`);
+    }
+
     addNewProduct(product: Product) {
         return this.apiService.post<Product>(`${this.PATH}/add-edit-item`, {
             _id: product._id || undefined,

@@ -12,12 +12,13 @@ export interface Section {
     type: string;
     items: Item[];
     footer?: FooterValues;
+    description: string;
 }
 
 export interface Item {
     _id: string;
     name: string;
-    description: string;
+    quantity: number;
     rentalPrice: number;
     costPrice: number;
     owner: 'Propio' | 'Tercero';

@@ -38,12 +38,7 @@
     <div class="grid">
         @for(section of sections; track section._id){
         <p-panel [header]="section.name" [toggleable]="true" class="text-2xl">
-            @for(item of section.items; track item._id){
-            <div class="flex items-center my-2">
-                <i class="pi font-bold pi-check mr-2"></i>
-                <p class="m-0 text-xl">{{item.description}}</p>
-            </div>
-            }
+            <p class="m-0 text-xl">{{section.description}}</p>
         </p-panel>
         }
     </div>

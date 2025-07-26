@@ -6,6 +6,7 @@ interface TableHeader {
     id: string;
     pipe: 'price' | 'date' | 'time' | null;
     type?: 'text' | 'number' | 'date' | 'boolean' | 'image' | 'icon' | 'link';
+    disbabled?: boolean;
 }
 
 interface TableAction {

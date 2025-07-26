@@ -8,7 +8,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { FormsModule } from '@angular/forms';
 import { SettingService } from '../../../settings/settings.service';
 import { Module } from '../../../../core/models/module';
-import { map, Subject, takeUntil } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, of, Subject, switchMap, takeUntil } from 'rxjs';
 import { EventsService } from '../../events.service';
 import { ActivatedRoute } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -16,17 +16,19 @@ import { EventDetail, Item, Section } from '../../../../core/models/event-detail
 import { ToastModule } from 'primeng/toast';
 import { Table } from '../../../../shared/components/table/table';
 import { FooterValues, TableSettings } from '../../../../core/models/table-setting';
-import { AutoCompleteCompleteEvent, AutoCompleteModule } from 'primeng/autocomplete';
+import { AutoCompleteCompleteEvent, AutoCompleteModule, AutoCompleteSelectEvent, AutoCompleteUnselectEvent } from 'primeng/autocomplete';
 import { InventoryService } from '../../../inventory/inventory.service';
 import { Product } from '../../../../core/models/product';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-quote',
-    imports: [CommonModule, Table, FormsModule, ButtonModule, ConfirmDialogModule, RadioButtonModule, ToolbarModule, DialogModule, SelectModule, SelectButtonModule, ToastModule, AutoCompleteModule, InputNumberModule, InputTextModule],
+    imports: [CommonModule, Table, FormsModule, ButtonModule, ConfirmDialogModule, TextareaModule, RadioButtonModule, ToolbarModule, DialogModule, SelectModule, SelectButtonModule, ToastModule, AutoCompleteModule, InputNumberModule, InputTextModule],
     standalone: true,
     templateUrl: './quote.html',
     providers: [MessageService, ConfirmationService]
@@ -49,10 +51,14 @@ export class Quote implements OnInit {
     confirmationService = inject(ConfirmationService);
 
     destroy$ = new Subject<void>();
+    itemSelected!: Product;
+
+    private searchTerm$ = new Subject<string>();
 
     eventDetail = signal<EventDetail>({
         _id: '',
         eventId: '',
+        description: '',
         section: []
     } as EventDetail);
 
@@ -61,6 +67,8 @@ export class Quote implements OnInit {
     currentSectionId!: string;
 
     itemDialog: boolean = false;
+
+    isUtilityItem = false;
     isItemDialogAdmin: boolean = false;
     ownerList = [
         { key: 'Propio', value: 'Propio' },
@@ -70,7 +78,7 @@ export class Quote implements OnInit {
     item: Item = {
         _id: '',
         name: '',
-        description: '',
+        quantity: 1,
         rentalPrice: 0,
         costPrice: 0,
         owner: 'Propio'
@@ -80,7 +88,7 @@ export class Quote implements OnInit {
         includesTotal: true,
         columns: [
             { field: 'name', header: 'Nombre' },
-            { field: 'description', header: 'Descripción' },
+            { field: 'quantity', header: 'Cantidad' },
             { field: 'rentalPrice', header: 'Valor Alquiler' },
             { field: 'costPrice', header: 'Valor Costo' },
             { field: 'owner', header: 'Propietario' }
@@ -95,8 +103,8 @@ export class Quote implements OnInit {
             },
             {
                 pipe: null,
-                id: 'description',
-                title: 'Descripción',
+                id: 'quantity',
+                title: 'Cantidad',
                 size: '16rem'
             },
             {
@@ -135,14 +143,14 @@ export class Quote implements OnInit {
     tableAdminSettings: TableSettings = {
         includesTotal: true,
         columns: [
-            { field: 'description', header: 'Descripción' },
+            { field: 'name', header: 'Descripción' },
             { field: 'rentalPrice', header: 'Valor' }
         ],
         globalFiltes: ['name', 'description'],
         header: [
             {
                 pipe: null,
-                id: 'description',
+                id: 'name',
                 title: 'Descripción',
                 size: '16rem'
             },
@@ -167,12 +175,22 @@ export class Quote implements OnInit {
             const eventId = this.eventId();
             this.getEventId(eventId);
         });
+
+        const suggestions$ = this.searchTerm$.pipe(
+            debounceTime(300),
+            distinctUntilChanged(),
+            switchMap((term) => this.fetchSuggestions(term))
+        );
+
+        const suggestionsSignal = toSignal(suggestions$, { initialValue: [] });
+        effect(() => {
+            this.inventory.set(suggestionsSignal());
+        });
     }
 
     ngOnInit(): void {
         this.getModules();
         this.loadDetail();
-        this.getAllInventory();
     }
 
     deleteItem(_: string, item: any) {
@@ -213,16 +231,93 @@ export class Quote implements OnInit {
         });
     }
 
+    saveUtility() {
+        this.submitted = true;
+        if (!this.item.name || !this.item.rentalPrice) {
+            return;
+        }
+
+        const aiuSection = this.eventDetail().section.find((s) => s._id === this.currentSectionId);
+        const valuesItemsAiu = {
+            admin: this.item.rentalPrice * 0.1,
+            unexpected: this.item.rentalPrice * 0.1,
+            management: this.item.rentalPrice * 0.1,
+            accounting: this.item.rentalPrice * 0.05
+        };
+
+        const newSection = aiuSection?.items.map((item) => {
+            if (item.name === 'Administración') item.rentalPrice = valuesItemsAiu.admin;
+            if (item.name === 'Imprevistos') item.rentalPrice = valuesItemsAiu.unexpected;
+            if (item.name === 'Contabilidad') item.rentalPrice = valuesItemsAiu.accounting;
+            if (item.name === 'Gestión') item.rentalPrice = valuesItemsAiu.management;
+
+            return item;
+        });
+
+        this.eventService.updateAiuSection(this.currentSectionId, newSection!).subscribe({
+            next: (data: any) => {
+                if (data) {
+                    this.eventDetail.update((event: EventDetail) => {
+                        const section = event.section.find((s) => s._id === this.currentSectionId);
+                        if (section) {
+                            return {
+                                ...event,
+                                section: [
+                                    ...event.section.map((s) =>
+                                        s._id === this.currentSectionId
+                                            ? {
+                                                  ...s,
+                                                  items: newSection!,
+                                                  footer: this.getFooterValues(newSection!, s.type)
+                                              }
+                                            : s
+                                    )
+                                ]
+                            };
+                        }
+                        return event;
+                    });
+
+                    this.eventService.eventId$.set('');
+                    this.eventService.eventId$.set(this.eventId());
+
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Éxito',
+                        detail: 'Sección AIU actualizada correctamente.',
+                        life: 3000
+                    });
+
+                    this.isUtilityItem = false;
+                    this.isItemDialogAdmin = false;
+                    this.itemDialog = false;
+                }
+            }
+        });
+    }
+
+    onSelectItem(item: AutoCompleteSelectEvent) {
+        this.itemSelected = item.value;
+        this.item.rentalPrice = item.value.rentalPrice;
+    }
+    onChangeQuantity(event: number) {
+        this.item.quantity = event;
+        this.item.rentalPrice = Math.round(event * (this.itemSelected.rentalPrice || 0));
+    }
+
     saveItem() {
         this.submitted = true;
-        if (!this.item.description || !this.item.rentalPrice || !this.item.owner) {
+        if (!this.item.name || !this.item.rentalPrice || this.item.quantity < 1) {
             return;
         }
         this.itemDialog = false;
 
         this.eventService.saveItemSection(this.eventId(), this.currentSectionId, this.item).subscribe({
             next: (data: any) => {
+                this.submitted = false;
+                this.itemSelected = {} as Product;
                 this.item = {
+                    quantity: 1,
                     owner: 'Propio'
                 } as Item;
 
@@ -265,6 +360,7 @@ export class Quote implements OnInit {
                         _id: data.data._id,
                         name: data.data.name,
                         type: data.data.type,
+                        description: data.data.description,
                         items: []
                     };
                     return {
@@ -289,7 +385,14 @@ export class Quote implements OnInit {
         this.itemDialog = true;
         if (item) {
             this.item = item;
+            this.itemSelected = {
+                rentalPrice: this.item.rentalPrice / this.item.quantity
+            } as Product;
+            this.isUtilityItem = item.name === 'Utilidad';
+            return;
         }
+
+        this.isUtilityItem = false;
     }
 
     hideDialog() {
@@ -298,7 +401,21 @@ export class Quote implements OnInit {
     }
 
     search(event: AutoCompleteCompleteEvent) {
-        this.inventorySearch = this.inventory().filter((item) => item.name?.includes(event.query));
+        this.item.name = event.query;
+        this.searchTerm$.next(event.query);
+    }
+
+    saveDescription(sectionId: string, description: string) {
+        this.eventService.editSectionDescription(this.eventId(), sectionId, description).subscribe({
+            next: () => {
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Éxito',
+                    detail: 'Descripción actualizada correctamente.',
+                    life: 3000
+                });
+            }
+        });
     }
 
     private getEventId(eventId: string) {
@@ -340,12 +457,12 @@ export class Quote implements OnInit {
         });
     }
 
-    private getAllInventory() {
-        this.inventoryService.getAllInventory().subscribe({
-            next: (data: any) => {
-                this.inventory.set(data.data);
-            }
-        });
+    private fetchSuggestions(term: string) {
+        if (!term || term.length < 2) {
+            return of([]);
+        }
+
+        return this.inventoryService.getItemInventoryByName(term).pipe(map((data: any) => data.data));
     }
 
     private getFooterValues(items: Item[], type: string): FooterValues {
@@ -354,13 +471,14 @@ export class Quote implements OnInit {
         const totalRentalPrice = items.reduce((acc, item) => acc + item.rentalPrice, 0);
         const totalCostPrice = items.reduce((acc, item) => acc + item.costPrice, 0);
         footer.size = isAdmin ? '1' : '2';
-        footer.values = [
-            { id: 'rentalPrice', value: totalRentalPrice, pipe: 'price' },
-            { id: 'empty1', value: 0, pipe: 'number' }
-        ];
+        footer.values = [{ id: 'rentalPrice', value: totalRentalPrice, pipe: 'price' }];
 
         if (!isAdmin) {
-            footer.values.push({ id: 'costPrice', value: totalCostPrice, pipe: 'price' }, { id: 'empty3', value: 0, pipe: 'number' }, { id: 'empty2', value: 0, pipe: 'number' });
+            footer.values.push({ id: 'costPrice', value: totalCostPrice, pipe: 'price' }, { id: 'empty2', value: 0, pipe: 'number' }, { id: 'empty3', value: 0, pipe: 'number' });
+        }
+
+        if (isAdmin) {
+            footer.values.push({ id: 'empty2', value: totalCostPrice, pipe: 'price' });
         }
 
         return footer;

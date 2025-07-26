@@ -30,7 +30,8 @@ export class AppMenu {
                     { label: 'Eventos', icon: 'pi pi-fw pi-shopping-bag', routerLink: ['/pages/events'] },
                     { label: 'Inventario', icon: 'pi pi-fw pi-warehouse', routerLink: ['/pages/inventory'] },
                     { label: 'Parametrización', icon: 'pi pi-fw pi-cog', routerLink: ['/pages/settings'] },
-                    { label: 'Empleados', icon: 'pi pi-fw pi-users', routerLink: ['/pages/employees'] }
+                    { label: 'Empleados', icon: 'pi pi-fw pi-users', routerLink: ['/pages/employees'] },
+                    { label: 'Clientes', icon: 'pi pi-fw pi-address-book', routerLink: ['/pages/customers'] }
                 ]
             }
         ];

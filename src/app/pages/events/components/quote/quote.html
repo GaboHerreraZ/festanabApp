@@ -14,17 +14,16 @@
         <ng-template #start>
             <p-button label="Nuevo Item" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew(section._id, null)" />
         </ng-template>
+        <ng-template #end>
+            <p-button label="Guardar" icon="pi pi-plus" class="mr-2" (onClick)="saveDescription(section._id, section.description)" />
+        </ng-template>
     </p-toolbar>
+    <textarea rows="5" cols="30" class="w-full" pTextarea [(ngModel)]="section.description"></textarea>
     <app-table [parentId]="section._id" [tableSettings]="tableSettings" [footerValues]="section.footer" [title]="'Administrar'" [data]="section.items" />
 </div>
 } @for(section of adminSections(); track section._id) {
 <div class="mt-5 card">
     <div class="font-semibold text-xl mb-4">{{section.name}}</div>
-    <!-- <p-toolbar styleClass="mb-6">
-        <ng-template #start>
-            <p-button label="Nuevo item" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew(section._id, null)" />
-        </ng-template>
-    </p-toolbar> -->
     <app-table [parentId]="section._id" [tableSettings]="tableAdminSettings" [footerValues]="section.footer" [title]="'Administrar'" [data]="section.items" />
 </div>
 }
@@ -35,19 +34,18 @@
             <div class="w-full">
                 <label for="name" class="block font-bold mb-3">Nombre</label>
                 <div class="flex flex-col w-full">
-                    <p-autocomplete [(ngModel)]="item.name" [disabled]="isItemDialogAdmin" [suggestions]="inventorySearch" [dropdown]="true" optionValue="name" optionLabel="name" (completeMethod)="search($event)" />
+                    <p-autocomplete [(ngModel)]="item.name" [disabled]="isItemDialogAdmin" [suggestions]="inventory()" [dropdown]="true" optionValue="name" optionLabel="name" (completeMethod)="search($event)" (onSelect)="onSelectItem($event)" />
                 </div>
                 <small class="text-red-500" *ngIf="submitted && !item.name">Nombre es requerido.</small>
             </div>
 
-            <div>
-                <label for="description" class="block font-bold mb-3">Descripción</label>
-                <input type="text" pInputText id="description" [(ngModel)]="item.description" required autofocus fluid />
-                <small class="text-red-500" *ngIf="submitted && !item.description">Description es requerida.</small>
+            <div class="col-span-6" *ngIf="!isItemDialogAdmin">
+                <label for="price" class="block font-bold mb-3">Cantidad</label>
+                <p-inputnumber id="price" [ngModel]="item.quantity" (ngModelChange)="onChangeQuantity($event)" [minFractionDigits]="0" fluid />
             </div>
 
             <div class="col-span-6">
-                <label for="price" class="block font-bold mb-3">Valor Alquiler</label>
+                <label for="price" class="block font-bold mb-3">{{ isItemDialogAdmin ? "Valor":"Valor Alquiler"}}</label>
                 <p-inputnumber id="price" [(ngModel)]="item.rentalPrice" mode="currency" [minFractionDigits]="0" currency="COP" fluid />
                 <small class="text-red-500" *ngIf="submitted && !item.rentalPrice">Valor Alquiler es requerido.</small>
             </div>
@@ -78,7 +76,7 @@
 
     <ng-template #footer>
         <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
-        <p-button label="Guardar" icon="pi pi-check" (click)="saveItem()" />
+        <p-button label="Guardar" icon="pi pi-check" (click)="!isUtilityItem ? saveItem(): saveUtility()" />
     </ng-template>
 </p-dialog>
 

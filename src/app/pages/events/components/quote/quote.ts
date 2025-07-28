@@ -16,7 +16,7 @@ import { EventDetail, Item, Section } from '../../../../core/models/event-detail
 import { ToastModule } from 'primeng/toast';
 import { Table } from '../../../../shared/components/table/table';
 import { FooterValues, TableSettings } from '../../../../core/models/table-setting';
-import { AutoCompleteCompleteEvent, AutoCompleteModule, AutoCompleteSelectEvent, AutoCompleteUnselectEvent } from 'primeng/autocomplete';
+import { AutoCompleteCompleteEvent, AutoCompleteModule, AutoCompleteSelectEvent } from 'primeng/autocomplete';
 import { InventoryService } from '../../../inventory/inventory.service';
 import { Product } from '../../../../core/models/product';
 import { InputNumberModule } from 'primeng/inputnumber';

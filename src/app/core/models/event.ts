@@ -1,5 +1,6 @@
 export interface Event {
     _id?: string;
+    customerId?: string;
     owner?: string;
     nit?: string;
     description?: string;

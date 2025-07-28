@@ -31,7 +31,8 @@ export class EventsService {
             owner: event.owner,
             nit: event.nit,
             location: event.location,
-            time: event.time
+            time: event.time,
+            customerId: event.customerId
         });
     }
 
@@ -44,7 +45,6 @@ export class EventsService {
     }
 
     saveItemSection(eventId: string, sectionId: string, item: Item) {
-        console.log('item', item);
         return this.apiService.post(`${this.PATH}/event-detail/${eventId}/section/${sectionId}/item`, { ...item });
     }
 

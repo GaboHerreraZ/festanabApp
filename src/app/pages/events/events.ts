@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
@@ -12,16 +12,20 @@ import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { Event as EventFesta } from '../../core/models/event';
 import { Column } from '../../core/models/column';
-import { Subject, takeUntil } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, of, Subject, switchMap, takeUntil } from 'rxjs';
 import { EventsService } from './events.service';
 import { MessageService } from 'primeng/api';
 import { DatePickerModule } from 'primeng/datepicker';
 import { TextareaModule } from 'primeng/textarea';
 import { Router } from '@angular/router';
+import { Customer } from '../../core/models/customer';
+import { AutoCompleteCompleteEvent, AutoCompleteModule, AutoCompleteSelectEvent } from 'primeng/autocomplete';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { CustomerService } from '../customer/customer.service';
 
 @Component({
     selector: 'app-events',
-    imports: [CommonModule, ButtonModule, InputTextModule, TableModule, ToolbarModule, IconFieldModule, InputIconModule, InputNumberModule, DialogModule, FormsModule, ToastModule, DatePickerModule, TextareaModule],
+    imports: [CommonModule, ButtonModule, InputTextModule, AutoCompleteModule, TableModule, ToolbarModule, IconFieldModule, InputIconModule, InputNumberModule, DialogModule, FormsModule, ToastModule, DatePickerModule, TextareaModule],
     standalone: true,
     templateUrl: './events.html',
     providers: [MessageService]
@@ -34,15 +38,32 @@ export class Events {
     eventDialog: boolean = false;
 
     events = signal<EventFesta[]>([]);
+    customerSearch: Customer[] = [];
+    customers = signal<Customer[]>([]);
 
     cols!: Column[];
+
+    private searchTerm$ = new Subject<string>();
 
     destroy$ = new Subject<void>();
 
     eventService = inject(EventsService);
+    customerService = inject(CustomerService);
+
     router = inject(Router);
 
-    constructor(private service: MessageService) {}
+    constructor(private service: MessageService) {
+        const suggestions$ = this.searchTerm$.pipe(
+            debounceTime(300),
+            distinctUntilChanged(),
+            switchMap((term) => this.fetchSuggestions(term))
+        );
+
+        const suggestionsSignal = toSignal(suggestions$, { initialValue: [] });
+        effect(() => {
+            this.customers.set(suggestionsSignal());
+        });
+    }
 
     ngOnInit() {
         this.loadData();
@@ -52,6 +73,17 @@ export class Events {
     ngOnDestroy(): void {
         this.destroy$.next();
         this.destroy$.complete();
+    }
+
+    onSelectCustomer(customer: AutoCompleteSelectEvent) {
+        this.event.customerId = customer.value._id;
+        this.event.owner = customer.value.name;
+        this.event.nit = customer.value.nit;
+    }
+
+    search(event: AutoCompleteCompleteEvent) {
+        this.event.owner = event.query;
+        this.searchTerm$.next(event.query);
     }
 
     openNew() {
@@ -77,6 +109,8 @@ export class Events {
             return;
         }
 
+        console.log(this.event);
+
         this.eventService.addEditEvents(this.event).subscribe({
             next: (data: any) => {
                 this.service.add({ severity: 'success', summary: 'Successful', detail: 'Evento guardado correctamente.', life: 3000 });
@@ -95,13 +129,14 @@ export class Events {
             },
             complete: () => {
                 this.eventDialog = false;
+                this.submitted = false;
                 this.event = {};
             }
         });
     }
 
     editEvent(event: EventFesta) {
-        this.event = { ...event, date: new Date(event.date!), time: new Date(event.time!) };
+        this.event = { ...event, date: new Date(event.date!), time: event.time ? new Date(event.time) : undefined };
         this.eventDialog = true;
     }
 
@@ -112,12 +147,20 @@ export class Events {
     private loadData() {
         this.cols = [
             { field: 'owner', header: 'Cliente' },
-            { field: 'phoneNumber', header: 'Cédula/Nit' },
+            { field: 'nit', header: 'Cédula/Nit' },
             { field: 'description', header: 'Tipo de Evento' },
             { field: 'location', header: 'Locación' },
             { field: 'date', header: 'Fecha' },
             { field: 'time', header: 'Hora' }
         ];
+    }
+
+    private fetchSuggestions(term: string) {
+        if (!term || term.length < 2) {
+            return of([]);
+        }
+
+        return this.customerService.getCustomerByName(term).pipe(map((data: any) => data.data));
     }
 
     private getAllEvent() {

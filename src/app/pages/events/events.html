@@ -83,13 +83,16 @@
             <div class="flex flex-col gap-6">
                 <div>
                     <label for="owner" class="block font-bold mb-3">Cliente</label>
-                    <input type="text" pInputText id="owner" [(ngModel)]="event.owner" required autofocus fluid />
+                    <!-- <input type="text" pInputText id="owner" [(ngModel)]="event.owner" required autofocus fluid /> -->
+
+                    <p-autocomplete [(ngModel)]="event.owner" (onSelect)="onSelectCustomer($event)" [suggestions]="customers()" [dropdown]="true" optionLabel="name" (completeMethod)="search($event)" />
+
                     <small class="text-red-500" *ngIf="submitted && !event.owner">Cliente es requerido.</small>
                 </div>
 
                 <div>
                     <label for="nit" class="block font-bold mb-3">Cédula / Nit:</label>
-                    <input type="text" pInputText id="nit" [(ngModel)]="event.nit" required autofocus fluid />
+                    <input type="text" pInputText id="nit" [(ngModel)]="event.nit" disabled required autofocus fluid />
                 </div>
 
                 <div>

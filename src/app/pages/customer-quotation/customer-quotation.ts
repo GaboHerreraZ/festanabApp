@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { combineLatest } from 'rxjs';
 import { PanelModule } from 'primeng/panel';
 import { DividerModule } from 'primeng/divider';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
     selector: 'app-customer-quotation',
@@ -21,7 +22,7 @@ export class CustomerQuotation implements OnInit {
     event: any;
     sections: any;
 
-    constructor() {
+    constructor(private domsanitizer: DomSanitizer) {
         effect(() => {
             const id = this.eventId();
             if (id) {
@@ -39,8 +40,11 @@ export class CustomerQuotation implements OnInit {
 
     getEventDetail(id: string) {
         combineLatest([this.eventService.getEventById(id), this.eventService.getTotalsByEventId(id)]).subscribe(([detail, event]: [any, any]) => {
-            console.log(detail);
             this.sections = detail.data.section.filter((item: any) => item.type === 'client');
+            this.sections.forEach((section: any) => {
+                const newDescription =  section.description.replace(/\n/g, '<br>');
+                section.description = this.domsanitizer.bypassSecurityTrustHtml(newDescription);
+            });
             this.event = event.data;
         });
     }

@@ -2,7 +2,6 @@ import { Component, computed } from '@angular/core';
 import { LoadingService } from '../../services/loading.service';
 import { CommonModule } from '@angular/common';
 import { ImageModule } from 'primeng/image';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ProgressBarModule } from 'primeng/progressbar';
 
 @Component({

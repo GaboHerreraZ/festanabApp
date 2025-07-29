@@ -8,12 +8,14 @@ import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
 import { CheckboxModule } from 'primeng/checkbox';
 import { FormsModule } from '@angular/forms';
+import { RadioButtonModule } from 'primeng/radiobutton';
+import { TagModule } from 'primeng/tag';
 
 @Component({
     selector: 'app-table',
     templateUrl: './table.html',
     standalone: true,
-    imports: [CommonModule, TableModule, ButtonModule, FormsModule, IconFieldModule, InputIconModule, InputTextModule, CheckboxModule]
+    imports: [CommonModule, TableModule, ButtonModule, TagModule, RadioButtonModule, FormsModule, IconFieldModule, InputIconModule, InputTextModule, CheckboxModule]
 })
 export class Table {
     @Input() data: any[] = [];
@@ -27,5 +29,20 @@ export class Table {
 
     onGlobalFilter(table: TablePrime, event: Event) {
         table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+    }
+
+    getSeverity(rowData: any): string {
+        if (this.tableSettings.events?.getSeverity) {
+            console.log('rowData', rowData);
+            return this.tableSettings.events.getSeverity(rowData);
+        }
+        return '';
+    }
+
+    getSeverityLabel(rowData: any): string {
+        if (this.tableSettings.events?.getSeverityLabel) {
+            return this.tableSettings.events.getSeverityLabel(rowData);
+        }
+        return '';
     }
 }

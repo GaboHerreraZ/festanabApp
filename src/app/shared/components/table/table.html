@@ -48,6 +48,10 @@
 
             } @if(header.pipe === 'time' && !header.type ) {
             <td [style.minWidth]="header.size">{{ item[header.id] | date:'h:mm a' }}</td>
+            } @if(!header.pipe && header.type ==='tag' ) {
+            <td>
+                <p-tag [value]="getSeverityLabel(item[header.id])" [severity]="getSeverity(item[header.id] )" />
+            </td>
             } }
 
             <!--   <td style="min-width: 12rem">{{ product.name }}</td>

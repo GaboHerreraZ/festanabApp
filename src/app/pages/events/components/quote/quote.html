@@ -57,18 +57,33 @@
                 <p-inputnumber id="price" [(ngModel)]="item.costPrice" mode="currency" [minFractionDigits]="0" currency="COP" fluid />
             </div>
 
-            <label for="price" class="block font-bold">Propietario</label>
+            <div class="flex flex-col md:flex-row gap-10">
+                <div>
+                    <label for="price" class="block font-bold">Propietario</label>
+                    <div class="flex flex-wrap gap-4 mt-4">
+                        <div class="flex items-center">
+                            <p-radiobutton name="propio" value="Propio" [(ngModel)]="item.owner" inputId="propio" />
+                            <label for="propio" class="ml-2">Propio</label>
+                        </div>
 
-            <div class="flex flex-wrap gap-4">
-                <div class="flex items-center">
-                    <p-radiobutton name="propio" value="Propio" [(ngModel)]="item.owner" inputId="propio" />
-                    <label for="propio" class="ml-2">Propio</label>
+                        <div class="flex items-center">
+                            <p-radiobutton name="Tercero" value="Tercero" [(ngModel)]="item.owner" inputId="Tercero" />
+                            <label for="Tercero" class="ml-2">Tercero</label>
+                        </div>
+                    </div>
                 </div>
+                <div>
+                    <label for="price" class="block font-bold">Estado</label>
+                    <div class="flex items-center mt-4">
+                        <p-checkbox inputId="done" name="done" [(ngModel)]="item.done" [binary]="true" />
+                        <label for="done" class="ml-2"> {{item.done ? 'Completado': 'Pendiente'}} </label>
+                    </div>
+                </div>
+            </div>
 
-                <div class="flex items-center">
-                    <p-radiobutton name="Tercero" value="Tercero" [(ngModel)]="item.owner" inputId="Tercero" />
-                    <label for="Tercero" class="ml-2">Tercero</label>
-                </div>
+            <div class="col-span-6">
+                <label for="price" class="block font-bold mb-3">Descripción</label>
+                <textarea rows="5" cols="30" class="w-full" pTextarea [(ngModel)]="item.description"></textarea>
             </div>
             }
         </div>

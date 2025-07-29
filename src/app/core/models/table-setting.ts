@@ -5,7 +5,7 @@ interface TableHeader {
     size: string;
     id: string;
     pipe: 'price' | 'date' | 'time' | null;
-    type?: 'text' | 'number' | 'date' | 'boolean' | 'image' | 'icon' | 'link';
+    type?: 'text' | 'number' | 'date' | 'boolean' | 'image' | 'icon' | 'link' | 'tag';
     disbabled?: boolean;
 }
 
@@ -21,6 +21,10 @@ export interface TableSettings {
     globalFiltes: string[];
     header: TableHeader[];
     actions: TableAction[];
+    events?: {
+        getSeverity: (rowData: any) => string;
+        getSeverityLabel: (rowData: any) => string;
+    };
 }
 
 export interface FooterValues {

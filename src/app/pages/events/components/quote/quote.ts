@@ -24,11 +24,29 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
+import { CheckboxModule } from 'primeng/checkbox';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-quote',
-    imports: [CommonModule, Table, FormsModule, ButtonModule, ConfirmDialogModule, TextareaModule, RadioButtonModule, ToolbarModule, DialogModule, SelectModule, SelectButtonModule, ToastModule, AutoCompleteModule, InputNumberModule, InputTextModule],
+    imports: [
+        CommonModule,
+        Table,
+        CheckboxModule,
+        FormsModule,
+        ButtonModule,
+        ConfirmDialogModule,
+        TextareaModule,
+        RadioButtonModule,
+        ToolbarModule,
+        DialogModule,
+        SelectModule,
+        SelectButtonModule,
+        ToastModule,
+        AutoCompleteModule,
+        InputNumberModule,
+        InputTextModule
+    ],
     standalone: true,
     templateUrl: './quote.html',
     providers: [MessageService, ConfirmationService]
@@ -78,16 +96,19 @@ export class Quote implements OnInit {
     item: Item = {
         _id: '',
         name: '',
+        description: '',
         quantity: 1,
         rentalPrice: 0,
         costPrice: 0,
-        owner: 'Propio'
+        owner: 'Propio',
+        done: false
     };
 
     tableSettings: TableSettings = {
         includesTotal: true,
         columns: [
             { field: 'name', header: 'Nombre' },
+            { field: 'done', header: 'Estado' },
             { field: 'quantity', header: 'Cantidad' },
             { field: 'rentalPrice', header: 'Valor Alquiler' },
             { field: 'costPrice', header: 'Valor Costo' },
@@ -100,6 +121,13 @@ export class Quote implements OnInit {
                 id: 'name',
                 title: 'Nombre',
                 size: '16rem'
+            },
+            {
+                pipe: null,
+                id: 'done',
+                title: 'Estado',
+                size: '10rem',
+                type: 'tag'
             },
             {
                 pipe: null,
@@ -137,7 +165,11 @@ export class Quote implements OnInit {
                 icon: 'pi pi-trash',
                 action: (rowData: any) => this.deleteItem(rowData.sectionId, rowData.item)
             }
-        ]
+        ],
+        events: {
+            getSeverity: (rowData: any) => this.getSeverity(rowData),
+            getSeverityLabel: (rowData: any) => this.getSeverityLabel(rowData)
+        }
     };
 
     tableAdminSettings: TableSettings = {
@@ -229,6 +261,16 @@ export class Quote implements OnInit {
                 });
             }
         });
+    }
+
+    getSeverity(item: any) {
+        if (!item) return 'danger';
+        return item ? 'success' : 'danger';
+    }
+
+    getSeverityLabel(item: any) {
+        if (!item) return 'Pendiente';
+        return item ? 'Completado' : 'Pendiente';
     }
 
     saveUtility() {

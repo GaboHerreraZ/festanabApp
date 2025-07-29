@@ -19,7 +19,9 @@ export interface Item {
     _id: string;
     name: string;
     quantity: number;
+    description: string;
     rentalPrice: number;
     costPrice: number;
     owner: 'Propio' | 'Tercero';
+    done: boolean;
 }

@@ -1,4 +1,4 @@
-import { Component, effect, inject, OnInit } from '@angular/core';
+import { Component, effect, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { TabsModule } from 'primeng/tabs';
 import { EventsService } from '../../events.service';
@@ -16,6 +16,7 @@ export class EventDetail implements OnInit {
     activeRoute = inject(ActivatedRoute);
 
     eventService = inject(EventsService);
+    utility = signal<number>(0);
 
     router = inject(Router);
 
@@ -65,6 +66,7 @@ export class EventDetail implements OnInit {
 
         return this.eventService.getTotalsByEventId(id).subscribe((totals: any) => {
             this.totalEvent = totals.data;
+            this.utility.set(this.totalEvent.totalRentalPrice - this.totalEvent.totalHourCost - this.totalEvent.totalBillValue);
         });
     }
 }

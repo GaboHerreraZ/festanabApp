@@ -91,4 +91,8 @@ export class EventsService {
     updateAiuSection(sectionId: string, items: any[]) {
         return this.apiService.post(`${this.PATH}/update-aiu-section`, { sectionId, items });
     }
+
+    deleteSection(eventId: string, sectionId: string) {
+        return this.apiService.delete(`${this.PATH}/delete-section/${eventId}/${sectionId}`);
+    }
 }

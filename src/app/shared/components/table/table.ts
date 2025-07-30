@@ -33,7 +33,6 @@ export class Table {
 
     getSeverity(rowData: any): string {
         if (this.tableSettings.events?.getSeverity) {
-            console.log('rowData', rowData);
             return this.tableSettings.events.getSeverity(rowData);
         }
         return '';

@@ -16,6 +16,7 @@
         </ng-template>
         <ng-template #end>
             <p-button label="Guardar" icon="pi pi-plus" class="mr-2" (onClick)="saveDescription(section._id, section.description)" />
+            <p-button label="Eliminar" icon="pi pi-trash" severity="danger" class="mr-2" (onClick)="deleteSection(section._id)" />
         </ng-template>
     </p-toolbar>
     <textarea rows="5" cols="30" class="w-full" pTextarea [(ngModel)]="section.description"></textarea>

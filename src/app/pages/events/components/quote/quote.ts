@@ -107,15 +107,21 @@ export class Quote implements OnInit {
     tableSettings: TableSettings = {
         includesTotal: true,
         columns: [
+            { field: 'quantity', header: 'Cantidad' },
             { field: 'name', header: 'Nombre' },
             { field: 'done', header: 'Estado' },
-            { field: 'quantity', header: 'Cantidad' },
-            { field: 'rentalPrice', header: 'Valor Alquiler' },
             { field: 'costPrice', header: 'Valor Costo' },
+            { field: 'rentalPrice', header: 'Valor Alquiler' },
             { field: 'owner', header: 'Propietario' }
         ],
         globalFiltes: ['name', 'description'],
         header: [
+            {
+                pipe: null,
+                id: 'quantity',
+                title: 'Cantidad',
+                size: '5rem'
+            },
             {
                 pipe: null,
                 id: 'name',
@@ -129,11 +135,12 @@ export class Quote implements OnInit {
                 size: '10rem',
                 type: 'tag'
             },
+
             {
-                pipe: null,
-                id: 'quantity',
-                title: 'Cantidad',
-                size: '16rem'
+                pipe: 'price',
+                id: 'costPrice',
+                title: 'Valor Costo',
+                size: '10rem'
             },
             {
                 pipe: 'price',
@@ -141,12 +148,7 @@ export class Quote implements OnInit {
                 title: 'Valor Alquiler',
                 size: '10rem'
             },
-            {
-                pipe: 'price',
-                id: 'costPrice',
-                title: 'Valor Costo',
-                size: '10rem'
-            },
+
             {
                 pipe: null,
                 id: 'owner',
@@ -347,6 +349,38 @@ export class Quote implements OnInit {
         this.item.rentalPrice = Math.round(event * (this.itemSelected.rentalPrice || 0));
     }
 
+    deleteSection(sectionId: string) {
+        this.confirmationService.confirm({
+            message: '¿Está seguro de eliminar la sección?',
+            header: 'Confirmar',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Sí',
+            rejectLabel: 'No',
+            accept: () => {
+                this.eventService.deleteSection(this.eventId(), sectionId).subscribe({
+                    next: (data: any) => {
+                        this.eventDetail.update((event: EventDetail) => {
+                            return {
+                                ...event,
+                                section: event.section.filter((s) => s._id !== sectionId)
+                            };
+                        });
+
+                        this.eventService.eventId$.set('');
+                        this.eventService.eventId$.set(this.eventId());
+
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Éxito',
+                            detail: 'Sección eliminada correctamente.',
+                            life: 3000
+                        });
+                    }
+                });
+            }
+        });
+    }
+
     saveItem() {
         this.submitted = true;
         if (!this.item.name || !this.item.rentalPrice || this.item.quantity < 1) {
@@ -512,7 +546,7 @@ export class Quote implements OnInit {
         const isAdmin = type === 'admin';
         const totalRentalPrice = items.reduce((acc, item) => acc + item.rentalPrice, 0);
         const totalCostPrice = items.reduce((acc, item) => acc + item.costPrice, 0);
-        footer.size = isAdmin ? '1' : '2';
+        footer.size = isAdmin ? '' : '3';
         footer.values = [{ id: 'rentalPrice', value: totalRentalPrice, pipe: 'price' }];
 
         if (!isAdmin) {

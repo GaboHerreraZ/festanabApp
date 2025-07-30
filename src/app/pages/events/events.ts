@@ -109,8 +109,6 @@ export class Events {
             return;
         }
 
-        console.log(this.event);
-
         this.eventService.addEditEvents(this.event).subscribe({
             next: (data: any) => {
                 this.service.add({ severity: 'success', summary: 'Successful', detail: 'Evento guardado correctamente.', life: 3000 });

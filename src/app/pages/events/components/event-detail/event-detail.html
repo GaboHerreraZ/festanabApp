@@ -1,88 +1,128 @@
-<div class="font-semibold text-3xl mb-4">Detalle del Evento</div>
+<div class="h-screen flex flex-col">
+    <div class="shrink-0">
+        <div class="font-semibold text-3xl mb-4">Detalle del Evento</div>
 
-<div class="card flex justify-between">
-    <div>
-        <span class="text-2xl font-bold">{{totalEvent.name}}</span>
-        <div>
-            <span class="mr-2 font-bold">{{totalEvent.owner }}</span>
+        <div class="hidden lg:block">
+            <div class="card flex justify-between">
+                <div>
+                    <span class="text-2xl font-bold">{{totalEvent.name}}</span>
+                    <div>
+                        <span class="mr-2 font-bold">{{totalEvent.owner }}</span>
+                    </div>
+
+                    <div class="mb-4">
+                        <span>{{totalEvent.time | date:'d \'de\' MMMM \'de\' y':'es' }}</span>
+                    </div>
+
+                    <div>
+                        <span>{{totalEvent.description }}</span>
+                    </div>
+                </div>
+                <div>
+                    <p-button label="Ver Cotización" severity="contrast" raised (onClick)="goClientQuote()" />
+                </div>
+            </div>
+            <div class="grid grid-cols-12 gap-8 mb-10">
+                <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+                    <div class="card mb-0">
+                        <div class="flex justify-between mb-4">
+                            <div>
+                                <span class="block text-muted-color font-medium mb-4">Total Cuenta de Cobro</span>
+                                <div class="text-surface-900 dark:text-surface-0 font-medium text-2xl">{{totalEvent.totalRentalPrice | currency:'COP':'symbol':'1.0-0'}}</div>
+                            </div>
+                            <div class="flex items-center justify-center bg-orange-100 dark:bg-orange-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
+                                <i class="pi pi-dollar text-orange-500 !text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+                    <div class="card mb-0">
+                        <div class="flex justify-between mb-4">
+                            <div>
+                                <span class="block text-muted-color font-medium mb-4">Total Mano de Obra</span>
+                                <div class="text-surface-900 dark:text-surface-0 font-medium text-2xl">{{totalEvent.totalHourCost | currency:'COP':'symbol':'1.0-0'}}</div>
+                            </div>
+                            <div class="flex items-center justify-center bg-orange-100 dark:bg-orange-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
+                                <i class="pi pi-dollar text-orange-500 !text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+                    <div class="card mb-0">
+                        <div class="flex justify-between mb-4">
+                            <div>
+                                <span class="block text-muted-color font-medium mb-4">Total Gastos </span>
+                                <div class="text-surface-900 dark:text-surface-0 font-medium text-2xl">{{totalEvent.totalBillValue | currency:'COP':'symbol':'1.0-0'}}</div>
+                            </div>
+                            <div class="flex items-center justify-center bg-orange-100 dark:bg-orange-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
+                                <i class="pi pi-dollar text-orange-500 !text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+                    <div class="p-[2rem] rounded-[6px] mb-0" [ngClass]="{'bg-red-200' : utility() <= 0, 'bg-green-200' : utility() > 0 , 'card': utility() === 0  }">
+                        <div class="flex justify-between mb-4">
+                            <div>
+                                <span class="block text-muted-color font-medium mb-4">Utilidad</span>
+                                <div class="text-surface-900 dark:text-surface-0 font-medium text-2xl">{{utility() | currency:'COP':'symbol':'1.0-0'}}</div>
+                            </div>
+                            <div class="flex items-center justify-center bg-orange-100 dark:bg-orange-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
+                                <i class="pi pi-dollar text-orange-500 !text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="mb-4">
-            <span>{{totalEvent.time | date:'d \'de\' MMMM \'de\' y':'es' }}</span>
+        <div class="block lg:hidden space-y-2 card">
+            <div class="text-xl font-semibold">{{ totalEvent.name }}</div>
+            <div class="text-sm text-gray-600">{{ totalEvent.owner }}</div>
+            <div class="text-sm text-gray-600">{{ totalEvent.time | date:'shortDate' }}</div>
+            <div class="text-sm text-gray-700">{{ totalEvent.description }}</div>
+
+            <div class="flex justify-between items-center mt-4">
+                <div>
+                    <div class="text-xs text-gray-500">Total Cobro</div>
+                    <div class="text-base font-semibold">{{ totalEvent.totalRentalPrice | currency:'COP':'symbol':'1.0-0' }}</div>
+                </div>
+                <div>
+                    <div class="text-xs text-gray-500 text-right">Mano de Obra</div>
+                    <div class="text-base font-semibold text-right">{{ totalEvent.totalHourCost | currency:'COP':'symbol':'1.0-0' }}</div>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <div>
+                    <div class="text-xs text-gray-500">Gastos</div>
+                    <div class="text-base font-semibold">{{ totalEvent.totalBillValue | currency:'COP':'symbol':'1.0-0' }}</div>
+                </div>
+                <div>
+                    <div class="text-xs text-gray-500 text-right">Utilidad</div>
+                    <div class="text-base font-semibold text-right" [ngClass]="{ 'text-green-600': utility() > 0, 'text-red-600': utility() <= 0 }">{{ utility() | currency:'COP':'symbol':'1.0-0' }}</div>
+                </div>
+            </div>
+            <div class="text-right mt-4">
+                <p-button label="Ver Cotización" size="small" (onClick)="goClientQuote()" />
+            </div>
         </div>
 
-        <div>
-            <span>{{totalEvent.description }}</span>
-        </div>
+        <p-tabs value="quote" class="overflow-x-auto whitespace-nowrap lg:whitespace-normal">
+            <p-tablist class="flex lg:flex-wrap gap-2 min-w-max">
+                @for(tab of tabs; track tab.route){
+                <p-tab [value]="tab.route" [routerLink]="tab.route" class="flex items-center gap-1 px-3 py-2 text-sm whitespace-nowrap">
+                    <i [class]="tab.icon"></i>
+                    <span>{{ tab.label }}</span>
+                </p-tab>
+                }
+            </p-tablist>
+        </p-tabs>
     </div>
-    <div>
-        <p-button label="Ver Cotización" severity="contrast" raised (onClick)="goClientQuote()" />
+
+    <div class="grow overflow-y-auto">
+        <router-outlet />
     </div>
 </div>
-
-<div class="grid grid-cols-12 gap-8 mb-10">
-    <div class="col-span-12 lg:col-span-6 xl:col-span-3">
-        <div class="card mb-0">
-            <div class="flex justify-between mb-4">
-                <div>
-                    <span class="block text-muted-color font-medium mb-4">Total Cuenta de Cobro</span>
-                    <div class="text-surface-900 dark:text-surface-0 font-medium text-2xl">{{totalEvent.totalRentalPrice | currency:'COP':'symbol':'1.0-0'}}</div>
-                </div>
-                <div class="flex items-center justify-center bg-orange-100 dark:bg-orange-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
-                    <i class="pi pi-dollar text-orange-500 !text-xl"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-span-12 lg:col-span-6 xl:col-span-3">
-        <div class="card mb-0">
-            <div class="flex justify-between mb-4">
-                <div>
-                    <span class="block text-muted-color font-medium mb-4">Total Mano de Obra</span>
-                    <div class="text-surface-900 dark:text-surface-0 font-medium text-2xl">{{totalEvent.totalHourCost | currency:'COP':'symbol':'1.0-0'}}</div>
-                </div>
-                <div class="flex items-center justify-center bg-orange-100 dark:bg-orange-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
-                    <i class="pi pi-dollar text-orange-500 !text-xl"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-span-12 lg:col-span-6 xl:col-span-3">
-        <div class="card mb-0">
-            <div class="flex justify-between mb-4">
-                <div>
-                    <span class="block text-muted-color font-medium mb-4">Total Gastos </span>
-                    <div class="text-surface-900 dark:text-surface-0 font-medium text-2xl">{{totalEvent.totalBillValue | currency:'COP':'symbol':'1.0-0'}}</div>
-                </div>
-                <div class="flex items-center justify-center bg-orange-100 dark:bg-orange-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
-                    <i class="pi pi-dollar text-orange-500 !text-xl"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-span-12 lg:col-span-6 xl:col-span-3">
-        <div class="p-[2rem] rounded-[6px] mb-0" [ngClass]="{'bg-red-200' : utility() <= 0, 'bg-green-200' : utility() > 0 , 'card': utility() === 0  }">
-            <div class="flex justify-between mb-4">
-                <div>
-                    <span class="block text-muted-color font-medium mb-4">Utilidad</span>
-                    <div class="text-surface-900 dark:text-surface-0 font-medium text-2xl">{{utility() | currency:'COP':'symbol':'1.0-0'}}</div>
-                </div>
-                <div class="flex items-center justify-center bg-orange-100 dark:bg-orange-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
-                    <i class="pi pi-dollar text-orange-500 !text-xl"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<p-tabs value="quote">
-    <p-tablist>
-        @for(tab of tabs; track tab.route){
-        <p-tab [value]="tab.route" [routerLink]="tab.route" class="flex items-center !gap-2 text-inherit">
-            <i [class]="tab.icon"></i>
-            <span>{{ tab.label }}</span>
-        </p-tab>
-        }
-    </p-tablist>
-</p-tabs>
-<router-outlet />

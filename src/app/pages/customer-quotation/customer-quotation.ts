@@ -6,10 +6,11 @@ import { combineLatest } from 'rxjs';
 import { PanelModule } from 'primeng/panel';
 import { DividerModule } from 'primeng/divider';
 import { DomSanitizer } from '@angular/platform-browser';
+import { ImageModule } from 'primeng/image';
 
 @Component({
     selector: 'app-customer-quotation',
-    imports: [CommonModule, PanelModule, DividerModule],
+    imports: [CommonModule, PanelModule, DividerModule, ImageModule],
     standalone: true,
     templateUrl: './customer-quotation.html'
 })

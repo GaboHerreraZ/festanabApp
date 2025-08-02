@@ -15,10 +15,11 @@ import { InventoryService } from './inventory.service';
 import { Subject, takeUntil } from 'rxjs';
 import { Column } from '../../core/models/column';
 import { Product } from '../../core/models/product';
+import { TextareaModule } from 'primeng/textarea';
 
 @Component({
     selector: 'app-inventory',
-    imports: [CommonModule, ButtonModule, InputTextModule, TableModule, ToolbarModule, IconFieldModule, InputIconModule, InputNumberModule, DialogModule, FormsModule, ToastModule],
+    imports: [CommonModule, ButtonModule, TextareaModule, InputTextModule, TableModule, ToolbarModule, IconFieldModule, InputIconModule, InputNumberModule, DialogModule, FormsModule, ToastModule],
     standalone: true,
     templateUrl: './inventory.html',
     providers: [MessageService, ConfirmationService]
@@ -127,7 +128,8 @@ export class Inventory implements OnInit, OnDestroy {
         this.cols = [
             { field: 'name', header: 'Nombre' },
             { field: 'quantity', header: 'Cantidad' },
-            { field: 'rentalPrice', header: 'Precio Alquiler' }
+            { field: 'rentalPrice', header: 'Precio Alquiler' },
+            { field: 'description', header: 'Descripción' }
         ];
     }
 

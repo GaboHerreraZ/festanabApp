@@ -9,7 +9,7 @@ import { ProgressBarModule } from 'primeng/progressbar';
     standalone: true,
     imports: [CommonModule, ImageModule, ProgressBarModule],
     template: `
-        <div *ngIf="isLoading()" class="fixed top-0  left-0 right-0 z-[1000] bg-black bg-opacity-50 h-screen  flex flex-col  items-center justify-center">
+        <div *ngIf="isLoading()" class="fixed top-0  left-0 right-0 z-[1200] bg-black bg-opacity-50 h-screen  flex flex-col  items-center justify-center">
             <p-image src="assets/images/festanab.png" alt="Festanab" width="250" />
             <p-progressbar mode="indeterminate" class="mt-4" [style]="{ height: '6px', width: '250px' }" />
         </div>

@@ -5,10 +5,13 @@ import { EventsService } from '../../events.service';
 import { EventTotal } from '../../../../core/models/event-total';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
+import { Clipboard } from '@angular/cdk/clipboard';
+import { TooltipModule } from 'primeng/tooltip';
+import { exportToExcel } from '../../../../shared/utils/export-event';
 
 @Component({
     selector: 'app-event-detail',
-    imports: [TabsModule, RouterModule, CommonModule, ButtonModule],
+    imports: [TabsModule, RouterModule, CommonModule, ButtonModule, TooltipModule],
     standalone: true,
     templateUrl: './event-detail.html'
 })
@@ -36,11 +39,11 @@ export class EventDetail implements OnInit {
 
     tabs = [
         { route: 'quote', label: 'Cotización', icon: 'pi pi-calculator' },
-        { route: 'labour', label: 'Registro de Horas', icon: 'pi pi-calendar-clock' },
-        { route: 'bills', label: 'Gastos', icon: 'pi pi-receipt' }
+        { route: 'bills', label: 'Gastos', icon: 'pi pi-receipt' },
+        { route: 'labour', label: 'Registro de Horas', icon: 'pi pi-calendar-clock' }
     ];
 
-    constructor() {
+    constructor(private clipboard: Clipboard) {
         effect(() => {
             const id = this.eventService.eventId$();
             this.getEventDetail(id);
@@ -55,8 +58,30 @@ export class EventDetail implements OnInit {
         });
     }
 
+    exportEvent() {
+        this.eventService.getEventById(this.eventService.eventId$()).subscribe((event: any) => {
+            console.log('event', event);
+            const exportData = {
+                description: this.totalEvent.description,
+                date: this.totalEvent.date,
+                time: this.totalEvent.time,
+                owner: this.totalEvent.owner,
+                sections: event.data.section.filter((s: any) => s.type === 'client')
+            };
+
+            exportToExcel(exportData as any);
+
+            console.log('exportData', exportData);
+        });
+    }
+
     goClientQuote() {
         this.router.navigate(['/customer-quotation', this.eventService.eventId$()]);
+    }
+
+    copyUrl() {
+        const url = `${window.location.origin}/customer-quotation/${this.eventService.eventId$()}`;
+        this.clipboard.copy(url);
     }
 
     private getEventDetail(id: string) {

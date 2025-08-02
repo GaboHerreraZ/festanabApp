@@ -19,6 +19,8 @@
                     </div>
                 </div>
                 <div>
+                    <p-button class="mr-2" pTooltip="Copiar Url Cotización" tooltipPosition="left" icon="pi pi-copy" aria-label="Save" (onClick)="copyUrl()" />
+                    <p-button label="Exportar" class="mr-2" severity="success" raised (onClick)="exportEvent()" />
                     <p-button label="Ver Cotización" severity="contrast" raised (onClick)="goClientQuote()" />
                 </div>
             </div>

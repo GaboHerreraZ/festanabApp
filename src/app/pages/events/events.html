@@ -23,21 +23,22 @@
         [rowsPerPageOptions]="[10, 20, 30]"
     >
         <ng-template #caption>
-            <div class="flex items-center justify-between">
+            <div class="flex md:flex-row flex-col items-center justify-between">
                 <h5 class="m-0">Administrar Eventos</h5>
                 <p-iconfield>
                     <p-inputicon styleClass="pi pi-search" />
-                    <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />
+                    <input class="w-full" pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />
                 </p-iconfield>
             </div>
         </ng-template>
         <ng-template #header>
             <tr>
+                <th style="min-width: 8rem"></th>
                 <th pSortableColumn="owner" style="min-width: 8rem">
                     Cliente
                     <p-sortIcon field="owner" />
                 </th>
-                <th pSortableColumn="nit" style="min-width: 8rem">
+                <th pSortableColumn="nit" style="min-width: 4rem">
                     Cédula / Nit
                     <p-sortIcon field="nit" />
                 </th>
@@ -58,22 +59,20 @@
                     Hora
                     <p-sortIcon field="time" />
                 </th>
-
-                <th style="min-width: 12rem"></th>
             </tr>
         </ng-template>
         <ng-template #body let-event>
             <tr>
-                <td style="min-width: 16rem">{{ event.owner }}</td>
-                <td style="min-width: 16rem">{{ event.nit }}</td>
-                <td style="min-width: 16rem">{{ event.description }}</td>
-                <td style="min-width: 16rem">{{ event.location }}</td>
-                <td style="min-width: 16rem">{{ event.date | date:'d \'de\' MMMM \'de\' y':'es' }}</td>
-                <td style="min-width: 16rem">{{ event.time | date:'h:mm a' }}</td>
                 <td>
                     <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editEvent(event)" />
                     <p-button icon="pi pi-pen-to-square" class="mr-2" [rounded]="true" [outlined]="true" (click)="goEventDetail(event)" />
                 </td>
+                <td style="min-width: 14rem">{{ event.owner }}</td>
+                <td style="min-width: 10rem">{{ event.nit }}</td>
+                <td style="min-width: 10rem">{{ event.description }}</td>
+                <td style="min-width: 10rem">{{ event.location }}</td>
+                <td style="min-width: 10rem">{{ event.date | date:'d \'de\' MMMM \'de\' y':'es' }}</td>
+                <td style="min-width: 10rem">{{ event.time | date:'h:mm a' }}</td>
             </tr>
         </ng-template>
     </p-table>

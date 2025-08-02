@@ -13,7 +13,7 @@
     [rowsPerPageOptions]="[10, 20, 30]"
 >
     <ng-template #caption>
-        <div class="flex items-center justify-between">
+        <div class="flex md:flex-row flex-col items-center justify-between">
             <h5 class="m-0">{{title}}</h5>
             <p-iconfield>
                 <p-inputicon styleClass="pi pi-search" />
@@ -23,17 +23,23 @@
     </ng-template>
     <ng-template #header>
         <tr>
+            <th style="min-width: 8rem"></th>
+
             @for(header of tableSettings.header; track header.id) {
             <th pSortableColumn="{{header.id}}" [style.minWidth]="header.size">
                 {{ header.title }}
                 <p-sortIcon field="{{header.id}}" />
             </th>
             }
-            <th style="min-width: 12rem"></th>
         </tr>
     </ng-template>
     <ng-template #body let-item>
         <tr>
+            <td>
+                @if(!item['disabled']) { @for(action of tableSettings.actions; track action.id) {
+                <p-button [icon]="action.icon" class="mr-2" [rounded]="true" [outlined]="true" (click)="action.action({sectionId: parentId, item})" />
+                } }
+            </td>
             @for(header of tableSettings.header; track header.id) { @if(!header.pipe && !header.type ) {
             <td [style.minWidth]="header.size">{{ item[header.id] }}</td>
             } @if(header.pipe === 'price' && !header.type ) {
@@ -57,12 +63,6 @@
             <!--   <td style="min-width: 12rem">{{ product.name }}</td>
             <td style="min-width: 16rem">{{ product.quantity }}</td>
             <td>{{ product.rentalPrice | currency: 'COP':'symbol':'1.0-0' }}</td> -->
-
-            <td>
-                @if(!item['disabled']) { @for(action of tableSettings.actions; track action.id) {
-                <p-button [icon]="action.icon" class="mr-2" [rounded]="true" [outlined]="true" (click)="action.action({sectionId: parentId, item})" />
-                } }
-            </td>
         </tr>
     </ng-template>
     @if(tableSettings.includesTotal && footerValues) {

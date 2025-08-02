@@ -25,7 +25,8 @@ export class InventoryService {
             _id: product._id || undefined,
             name: product.name,
             quantity: product.quantity,
-            rentalPrice: product.rentalPrice
+            rentalPrice: product.rentalPrice,
+            description: product.description
         });
     }
 }

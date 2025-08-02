@@ -3,4 +3,5 @@ export interface Product {
     name?: string;
     quantity?: number;
     rentalPrice?: number;
+    description?: string;
 }

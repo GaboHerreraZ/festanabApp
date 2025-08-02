@@ -546,7 +546,7 @@ export class Quote implements OnInit {
         const isAdmin = type === 'admin';
         const totalRentalPrice = items.reduce((acc, item) => acc + item.rentalPrice, 0);
         const totalCostPrice = items.reduce((acc, item) => acc + item.costPrice, 0);
-        footer.size = isAdmin ? '' : '4';
+        footer.size = isAdmin ? '2' : '5';
         footer.values = [{ id: 'rentalPrice', value: totalRentalPrice, pipe: 'price' }];
 
         if (!isAdmin) {

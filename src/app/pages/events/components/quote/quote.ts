@@ -343,6 +343,7 @@ export class Quote implements OnInit {
     onSelectItem(item: AutoCompleteSelectEvent) {
         this.itemSelected = item.value;
         this.item.rentalPrice = item.value.rentalPrice;
+        this.item.description = item.value.description || '';
     }
     onChangeQuantity(event: number) {
         this.item.quantity = event;

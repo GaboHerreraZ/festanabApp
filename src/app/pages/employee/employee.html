@@ -32,6 +32,8 @@
         </ng-template>
         <ng-template #header>
             <tr>
+                <th style="min-width: 4rem"></th>
+
                 <th pSortableColumn="name" style="min-width: 16rem">
                     Nombre
                     <p-sortIcon field="name" />
@@ -44,19 +46,17 @@
                     Precio Hora
                     <p-sortIcon field="price" />
                 </th>
-                <th style="min-width: 12rem"></th>
             </tr>
         </ng-template>
         <ng-template #body let-employee>
             <tr>
-                <td style="min-width: 12rem">{{ employee.name }}</td>
-                <td style="min-width: 16rem">{{ employee.cc }}</td>
-                <td>{{ employee.hourPrice | currency: 'COP':'symbol':'1.0-0' }}</td>
-
                 <td>
                     <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editEmployee(employee)" />
                     <!-- <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteProduct(product)" /> -->
                 </td>
+                <td style="min-width: 12rem">{{ employee.name }}</td>
+                <td style="min-width: 16rem">{{ employee.cc }}</td>
+                <td>{{ employee.hourPrice | currency: 'COP':'symbol':'1.0-0' }}</td>
             </tr>
         </ng-template>
     </p-table>

@@ -42,7 +42,7 @@ export class Bills implements OnInit {
     footerValues: Signal<FooterValues> = computed(() => {
         const footer: FooterValues = {} as FooterValues;
         const total = this.bills().reduce((acc, bill) => acc + (bill.value || 0), 0);
-        footer.size = '2';
+        footer.size = '3';
         footer.values = [
             { id: 'total', value: total, pipe: 'price' },
             { id: 'empty1', value: 0, pipe: 'number' },

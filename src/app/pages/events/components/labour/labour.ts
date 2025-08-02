@@ -43,33 +43,7 @@ export class Labour implements OnInit, OnDestroy {
 
     hasErrorTime: boolean = false;
 
-    item: Hour = {
-        _id: '',
-        eventId: this.eventId(),
-        employee: '',
-        cc: '',
-        hourPrice: 0,
-        date: new Date(),
-        startTime: new Date(this.currentDate.setHours(6, 0, 0, 0)),
-        hrsOrd: 0,
-        valHrsOrd: 0,
-        hrsExtDia: 0,
-        valExtDia: 0,
-        hrsNoc: 0,
-        valHrsNoc: 0,
-        hrsExtNoc: 0,
-        valExtNoc: 0,
-        hrsDomDia: 0,
-        valDomDia: 0,
-        hrsExtDomDia: 0,
-        valExtDomDia: 0,
-        hrsDomNoc: 0,
-        valDomNoc: 0,
-        hrsExtDomNoc: 0,
-        valExtDomNoc: 0,
-        auxiliaryTrasport: 0,
-        total: 0
-    };
+    item: Hour = this.getEmptyHour();
 
     footerValues: Signal<FooterValues> = computed(() => {
         const footer: FooterValues = {} as FooterValues;
@@ -98,7 +72,7 @@ export class Labour implements OnInit, OnDestroy {
         const total = this.hours().reduce((acc, bill) => acc + (bill.total || 0), 0);
         const auxTotal = this.hours().reduce((acc, bill) => acc + (bill.auxiliaryTrasport || 0), 0);
 
-        footer.size = '6';
+        footer.size = '7';
         footer.values = [
             { id: 'totaHrsOrd', value: totaHrsOrd, pipe: 'number' },
             { id: 'valTotaHrsOrd', value: valTotaHrsOrd, pipe: 'price' },
@@ -354,6 +328,37 @@ export class Labour implements OnInit, OnDestroy {
         this.getAllEmployees();
     }
 
+    getEmptyHour() {
+        return {
+            _id: '',
+            employeeId: '',
+            eventId: this.eventId(),
+            employee: '',
+            cc: '',
+            hourPrice: 0,
+            date: new Date(),
+            startTime: new Date(this.currentDate.setHours(6, 0, 0, 0)),
+            hrsOrd: 0,
+            valHrsOrd: 0,
+            hrsExtDia: 0,
+            valExtDia: 0,
+            hrsNoc: 0,
+            valHrsNoc: 0,
+            hrsExtNoc: 0,
+            valExtNoc: 0,
+            hrsDomDia: 0,
+            valDomDia: 0,
+            hrsExtDomDia: 0,
+            valExtDomDia: 0,
+            hrsDomNoc: 0,
+            valDomNoc: 0,
+            hrsExtDomNoc: 0,
+            valExtDomNoc: 0,
+            auxiliaryTrasport: 0,
+            total: 0
+        };
+    }
+
     ngOnDestroy(): void {
         this.destroy$.next();
         this.destroy$.complete();
@@ -376,6 +381,7 @@ export class Labour implements OnInit, OnDestroy {
         this.item.employee = value.name || '';
         this.item.cc = value.cc || '';
         this.item.hourPrice = value.hourPrice || 0;
+        this.item.employeeId = value._id || '';
     }
 
     deleteItem(item: Hour) {
@@ -411,12 +417,13 @@ export class Labour implements OnInit, OnDestroy {
 
     hideDialog() {
         this.timeDialog = false;
+        this.item = this.getEmptyHour();
     }
 
     saveItem() {
         this.submitted = true;
         this.hasErrorTime = this.item && this.item.endTime && this.item.endTime ? this.item.endTime < this.item.startTime : false;
-        if (!this.item.employee || !this.item.cc || !this.item.date || !this.item.startTime || this.hasErrorTime) {
+        if (!this.item.employee || this.item.hourPrice === 0 || !this.item.cc || !this.item.date || !this.item.startTime || this.hasErrorTime) {
             this.submitted = false;
             return;
         }
@@ -439,6 +446,18 @@ export class Labour implements OnInit, OnDestroy {
                     this.timeDialog = false;
                     this.eventService.eventId$.set('');
                     this.eventService.eventId$.set(this.eventId());
+                    this.submitted = false;
+                    this.item = this.getEmptyHour();
+                },
+                error: (error: any) => {
+                    console.log('error', error);
+                    const { message } = error.error.error || {};
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: message,
+                        life: 3000
+                    });
                 }
             });
 

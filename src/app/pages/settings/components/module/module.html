@@ -32,20 +32,19 @@
         </ng-template>
         <ng-template #header>
             <tr>
+                <th style="min-width: 4rem"></th>
                 <th pSortableColumn="module" style="min-width: 16rem">
                     Módulo
                     <p-sortIcon field="module" />
                 </th>
-                <th style="min-width: 12rem"></th>
             </tr>
         </ng-template>
         <ng-template #body let-module>
             <tr>
-                <td style="min-width: 12rem">{{ module.module }}</td>
-
                 <td>
                     <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editModule(module)" />
                 </td>
+                <td style="min-width: 12rem">{{ module.module }}</td>
             </tr>
         </ng-template>
     </p-table>

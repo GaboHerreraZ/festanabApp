@@ -25,4 +25,6 @@ export interface Hour {
     valExtDomNoc: number; // Valor horas extras nocturnas dominicales
     auxiliaryTrasport: number;
     total: number; // Total de horas
+
+    employeeId: string; // ID del empleado
 }

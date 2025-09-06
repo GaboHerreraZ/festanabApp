@@ -33,15 +33,7 @@
                                 <span class="block text-muted-color font-medium mb-4">Total Cuenta de Cobro</span>
                                 <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{ showTotals.totalRentalPrice ? (totalEvent.totalRentalPrice | currency:'COP':'symbol':'1.0-0'): (totalEvent.totalRentalPrice | mask) }}</div>
                             </div>
-                            <p-button
-                                [icon]="  showTotals.totalRentalPrice ? 'pi pi-eye-slash': 'pi pi-eye'"
-                                (mousedown)="toggle(true, 'totalRentalPrice')"
-                                (mouseup)="toggle(false, 'totalRentalPrice')"
-                                (mouseleave)="toggle(false, 'totalRentalPrice')"
-                                (touchstart)="toggle(true, 'totalRentalPrice')"
-                                (touchend)="toggle(false, 'totalRentalPrice')"
-                                [rounded]="true"
-                            />
+                            <p-button [icon]="  showTotals.totalRentalPrice ? 'pi pi-eye-slash': 'pi pi-eye'" (onClick)="toggle(!showTotals.totalRentalPrice, 'totalRentalPrice')" [rounded]="true" />
                         </div>
                     </div>
                 </div>
@@ -52,15 +44,7 @@
                                 <span class="block text-muted-color font-medium mb-4">Total Mano de Obra</span>
                                 <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{ showTotals.totalHourCost ? (totalEvent.totalHourCost | currency:'COP':'symbol':'1.0-0') : (totalEvent.totalHourCost | mask) }}</div>
                             </div>
-                            <p-button
-                                [icon]="  showTotals.totalRentalPrice ? 'pi pi-eye-slash': 'pi pi-eye'"
-                                (mousedown)="toggle(true, 'totalHourCost')"
-                                (mouseup)="toggle(false, 'totalHourCost')"
-                                (mouseleave)="toggle(false, 'totalHourCost')"
-                                (touchstart)="toggle(true, 'totalHourCost')"
-                                (touchend)="toggle(false, 'totalHourCost')"
-                                [rounded]="true"
-                            />
+                            <p-button [icon]="  showTotals.totalHourCost ? 'pi pi-eye-slash': 'pi pi-eye'" (onClick)="toggle(!showTotals.totalHourCost, 'totalHourCost')" [rounded]="true" />
                         </div>
                     </div>
                 </div>
@@ -71,15 +55,7 @@
                                 <span class="block text-muted-color font-medium mb-4">Total Gastos </span>
                                 <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{ showTotals.totalBillValue ? (totalEvent.totalBillValue | currency:'COP':'symbol':'1.0-0'): totalEvent.totalBillValue | mask}}</div>
                             </div>
-                            <p-button
-                                [icon]="  showTotals.totalRentalPrice ? 'pi pi-eye-slash': 'pi pi-eye'"
-                                (mousedown)="toggle(true, 'totalBillValue')"
-                                (mouseup)="toggle(false, 'totalBillValue')"
-                                (mouseleave)="toggle(false, 'totalBillValue')"
-                                (touchstart)="toggle(true, 'totalBillValue')"
-                                (touchend)="toggle(false, 'totalBillValue')"
-                                [rounded]="true"
-                            />
+                            <p-button [icon]="  showTotals.totalBillValue ? 'pi pi-eye-slash': 'pi pi-eye'" (onClick)="toggle(!showTotals.totalBillValue, 'totalBillValue')" [rounded]="true" />
                         </div>
                     </div>
                 </div>
@@ -90,15 +66,7 @@
                                 <span class="block text-muted-color font-medium mb-4">Utilidad</span>
                                 <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{ showTotals.utility ? (utility() | currency:'COP':'symbol':'1.0-0') : utility() | mask}}</div>
                             </div>
-                            <p-button
-                                [icon]="  showTotals.totalRentalPrice ? 'pi pi-eye-slash': 'pi pi-eye'"
-                                (mousedown)="toggle(true, 'utility')"
-                                (mouseup)="toggle(false, 'utility')"
-                                (mouseleave)="toggle(false, 'utility')"
-                                (touchstart)="toggle(true, 'utility')"
-                                (touchend)="toggle(false, 'utility')"
-                                [rounded]="true"
-                            />
+                            <p-button [icon]="  showTotals.utility ? 'pi pi-eye-slash': 'pi pi-eye'" (onClick)="toggle(!showTotals.utility, 'utility')" [rounded]="true" />
                         </div>
                     </div>
                 </div>

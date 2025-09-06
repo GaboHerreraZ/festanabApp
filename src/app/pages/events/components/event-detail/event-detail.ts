@@ -90,7 +90,10 @@ export class EventDetail implements OnInit {
     }
 
     toggle(event: boolean, total: 'totalRentalPrice' | 'totalHourCost' | 'totalBillValue' | 'utility') {
-        this.showTotals[total] = event;
+        this.showTotals = {
+            ...this.showTotals,
+            [total]: event
+        };
     }
 
     private getEventDetail(id: string) {

@@ -95,4 +95,8 @@ export class EventsService {
     deleteSection(eventId: string, sectionId: string) {
         return this.apiService.delete(`${this.PATH}/delete-section/${eventId}/${sectionId}`);
     }
+
+    cloneEvent(eventId: string) {
+        return this.apiService.get(`${this.PATH}/clone-event/${eventId}`);
+    }
 }

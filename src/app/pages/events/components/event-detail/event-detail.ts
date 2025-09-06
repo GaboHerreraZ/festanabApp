@@ -8,10 +8,11 @@ import { ButtonModule } from 'primeng/button';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { TooltipModule } from 'primeng/tooltip';
 import { exportToExcel } from '../../../../shared/utils/export-event';
+import { MaskPipe } from '../../../../shared/pipes/hide-maks';
 
 @Component({
     selector: 'app-event-detail',
-    imports: [TabsModule, RouterModule, CommonModule, ButtonModule, TooltipModule],
+    imports: [TabsModule, RouterModule, CommonModule, ButtonModule, TooltipModule, MaskPipe],
     standalone: true,
     templateUrl: './event-detail.html'
 })
@@ -43,6 +44,13 @@ export class EventDetail implements OnInit {
         { route: 'labour', label: 'Registro de Horas', icon: 'pi pi-calendar-clock' }
     ];
 
+    showTotals = {
+        totalRentalPrice: false,
+        totalHourCost: false,
+        totalBillValue: false,
+        utility: false
+    };
+
     constructor(private clipboard: Clipboard) {
         effect(() => {
             const id = this.eventService.eventId$();
@@ -60,7 +68,6 @@ export class EventDetail implements OnInit {
 
     exportEvent() {
         this.eventService.getEventById(this.eventService.eventId$()).subscribe((event: any) => {
-            console.log('event', event);
             const exportData = {
                 description: this.totalEvent.description,
                 date: this.totalEvent.date,
@@ -70,8 +77,6 @@ export class EventDetail implements OnInit {
             };
 
             exportToExcel(exportData as any);
-
-            console.log('exportData', exportData);
         });
     }
 
@@ -82,6 +87,10 @@ export class EventDetail implements OnInit {
     copyUrl() {
         const url = `${window.location.origin}/customer-quotation/${this.eventService.eventId$()}`;
         this.clipboard.copy(url);
+    }
+
+    toggle(event: boolean, total: 'totalRentalPrice' | 'totalHourCost' | 'totalBillValue' | 'utility') {
+        this.showTotals[total] = event;
     }
 
     private getEventDetail(id: string) {

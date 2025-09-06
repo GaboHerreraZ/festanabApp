@@ -101,6 +101,18 @@ export class Events {
         this.submitted = false;
     }
 
+    clone(event: EventFesta) {
+        this.eventService.cloneEvent(event._id!).subscribe({
+            next: (response: any) => {
+                const { data } = response;
+                this.router.navigate(['/pages/event-detail', data.eventId]);
+            },
+            error: () => {
+                this.service.add({ severity: 'error', summary: 'Error', detail: 'No se pudo clonar el evento.' });
+            }
+        });
+    }
+
     saveEvent() {
         this.submitted = true;
         let _events = this.events();

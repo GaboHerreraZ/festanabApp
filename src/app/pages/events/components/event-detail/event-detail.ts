@@ -42,7 +42,7 @@ export class EventDetail implements OnInit {
         { route: 'quote', label: 'Cotización', icon: 'pi pi-calculator' },
         { route: 'bills', label: 'Gastos', icon: 'pi pi-receipt' },
         { route: 'labour', label: 'Registro de Horas', icon: 'pi pi-calendar-clock' },
-        { route: 'customer-quote', label: 'Cotizaciones', icon: 'pi receipt' }
+        { route: 'customer-quote', label: 'Historial Cotizaciones Cliente', icon: 'pi receipt' }
     ];
 
     showTotals = {

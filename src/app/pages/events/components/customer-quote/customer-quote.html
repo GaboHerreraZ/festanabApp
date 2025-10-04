@@ -1,0 +1,11 @@
+<p-toast />
+<div class="mt-5 card">
+    <div class="font-semibold text-xl mb-4">Cotizaciones</div>
+    <p-toolbar styleClass="mb-6">
+        <ng-template #start>
+            <p-button label="Crear Cotización" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="newQuote()" />
+        </ng-template>
+    </p-toolbar>
+    <app-table [parentId]="''" [tableSettings]="tableSettings" [title]="'Administrar Cotizaciones'" [data]="quotes()" />
+</div>
+<p-confirmdialog [style]="{ width: '450px' }" />

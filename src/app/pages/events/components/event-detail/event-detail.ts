@@ -41,7 +41,8 @@ export class EventDetail implements OnInit {
     tabs = [
         { route: 'quote', label: 'Cotización', icon: 'pi pi-calculator' },
         { route: 'bills', label: 'Gastos', icon: 'pi pi-receipt' },
-        { route: 'labour', label: 'Registro de Horas', icon: 'pi pi-calendar-clock' }
+        { route: 'labour', label: 'Registro de Horas', icon: 'pi pi-calendar-clock' },
+        { route: 'customer-quote', label: 'Cotizaciones', icon: 'pi receipt' }
     ];
 
     showTotals = {
@@ -78,15 +79,6 @@ export class EventDetail implements OnInit {
 
             exportToExcel(exportData as any);
         });
-    }
-
-    goClientQuote() {
-        this.router.navigate(['/customer-quotation', this.eventService.eventId$()]);
-    }
-
-    copyUrl() {
-        const url = `${window.location.origin}/customer-quotation/${this.eventService.eventId$()}`;
-        this.clipboard.copy(url);
     }
 
     toggle(event: boolean, total: 'totalRentalPrice' | 'totalHourCost' | 'totalBillValue' | 'utility') {

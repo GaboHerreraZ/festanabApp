@@ -4,6 +4,8 @@ import { Event } from '../../core/models/event';
 import { Item } from '../../core/models/event-detail.model';
 import { Bill } from '../../core/models/bill';
 import { Hour } from '../../core/models/hour';
+import { CustomerQuote } from '../../core/models/customer-quote';
+import { Observable } from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
@@ -98,5 +100,21 @@ export class EventsService {
 
     cloneEvent(eventId: string) {
         return this.apiService.get(`${this.PATH}/clone-event/${eventId}`);
+    }
+
+    newCustomerQuote(eventId: string): Observable<CustomerQuote> {
+        return this.apiService.post<CustomerQuote>(`${this.PATH}/customer-quote/`, { eventId });
+    }
+
+    getAllCustomerQuotes(eventId: string): Observable<CustomerQuote[]> {
+        return this.apiService.get<CustomerQuote[]>(`${this.PATH}/customer-quotes/${eventId}`);
+    }
+
+    deleteCustomerQuote(quoteId: string) {
+        return this.apiService.delete(`${this.PATH}/delete-customer-quote/${quoteId}`);
+    }
+
+    getCustomerQuote(quoteId: string) {
+        return this.apiService.get(`${this.PATH}/get-customer-quote/${quoteId}`);
     }
 }

@@ -8,6 +8,7 @@ import { Quote } from './events/components/quote/quote';
 import { Bills } from './events/components/bills/bills';
 import { Labour } from './events/components/labour/labour';
 import { Customer } from './customer/customer';
+import { CustomerQuote } from './events/components/customer-quote/customer-quote';
 
 export default [
     { path: 'inventory', component: Inventory },
@@ -33,6 +34,10 @@ export default [
             {
                 path: 'labour',
                 component: Labour
+            },
+            {
+                path: 'customer-quote',
+                component: CustomerQuote
             }
         ]
     },

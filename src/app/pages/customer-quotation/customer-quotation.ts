@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, effect, inject, OnInit, signal } from '@angular/core';
+import { Component, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { EventsService } from '../events/events.service';
 import { ActivatedRoute } from '@angular/router';
-import { combineLatest } from 'rxjs';
+import { combineLatest, Observable, Subject, takeUntil } from 'rxjs';
 import { PanelModule } from 'primeng/panel';
 import { DividerModule } from 'primeng/divider';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -14,11 +14,12 @@ import { ImageModule } from 'primeng/image';
     standalone: true,
     templateUrl: './customer-quotation.html'
 })
-export class CustomerQuotation implements OnInit {
+export class CustomerQuotation implements OnInit, OnDestroy {
     eventService = inject(EventsService);
     activatedRoute = inject(ActivatedRoute);
 
     eventId = signal<string>('');
+    destroy$ = new Subject<void>();
 
     event: any;
     sections: any;
@@ -39,14 +40,23 @@ export class CustomerQuotation implements OnInit {
         });
     }
 
-    getEventDetail(id: string) {
-        combineLatest([this.eventService.getEventById(id), this.eventService.getTotalsByEventId(id)]).subscribe(([detail, event]: [any, any]) => {
-            this.sections = detail.data.section.filter((item: any) => item.type === 'client');
-            this.sections.forEach((section: any) => {
-                const newDescription =  section.description.replace(/\n/g, '<br>');
-                section.description = this.domsanitizer.bypassSecurityTrustHtml(newDescription);
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
+    private getEventDetail(id: string) {
+        this.eventService
+            .getCustomerQuote(id)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((res: any) => {
+                const data = res.data;
+                this.sections = data.detail.section.filter((item: any) => item.type === 'client');
+                this.sections.forEach((section: any) => {
+                    const newDescription = section.description.replace(/\n/g, '<br>');
+                    section.description = this.domsanitizer.bypassSecurityTrustHtml(newDescription);
+                });
+                this.event = data;
             });
-            this.event = event.data;
-        });
     }
 }

@@ -42,6 +42,10 @@ export class EventsService {
         return this.apiService.get(`${this.PATH}/event-detail/${eventId}`);
     }
 
+    updateEventStatusById(eventId: string, status: string) {
+        return this.apiService.post(`${this.PATH}/event-detail/update-status`, { _id: eventId, status });
+    }
+
     saveSection(eventId: string, section: string) {
         return this.apiService.post(`${this.PATH}/event-detail/${eventId}/section`, { name: section });
     }

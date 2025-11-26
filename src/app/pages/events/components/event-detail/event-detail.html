@@ -1,9 +1,11 @@
+<p-toast />
+
 <div class="h-screen flex flex-col">
     <div class="shrink-0">
         <div class="font-semibold text-3xl mb-2">Detalle del Evento</div>
 
         <div class="hidden lg:block">
-            <div class="card flex justify-between !p-4 !mb-4">
+            <div class="card flex justify-between !p-4 !mb-4" [ngStyle]="{'border': totalEvent.status === 'pending' ? '2px solid #ef4444 ': totalEvent.status === 'completed' ? '2px solid #22c55e':'2px solid #0ea5e9'}">
                 <div>
                     <span class="text-2xl font-bold">{{totalEvent.name}}</span>
                     <div>
@@ -20,6 +22,7 @@
                     </div>
                 </div>
                 <div>
+                    <p-select (onChange)="updateStatus($event)" [options]="eventStatus" [(ngModel)]="totalEvent.status" optionLabel="value" optionValue="key" placeholder="Actualizar Estado" class="w-full md:w-44 mr-2" />
                     <p-button label="Exportar" class="mr-2" severity="success" raised (onClick)="exportEvent()" />
                 </div>
             </div>
@@ -99,6 +102,7 @@
                 </div>
             </div>
             <div class="flex justify-between mt-4">
+                <p-select (onChange)="updateStatus($event)" [options]="eventStatus" size="small" [(ngModel)]="status" optionLabel="value" optionValue="key" placeholder="Actualizar Estado" class="w-full md:w-44 mr-2" />
                 <p-button label="Exportar" size="small" class="mr-2" severity="success" raised (onClick)="exportEvent()" />
             </div>
         </div>

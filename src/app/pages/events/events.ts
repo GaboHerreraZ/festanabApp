@@ -22,16 +22,23 @@ import { ICustomer } from '../../core/models/customer';
 import { AutoCompleteCompleteEvent, AutoCompleteModule, AutoCompleteSelectEvent } from 'primeng/autocomplete';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CustomerService } from '../customer/customer.service';
+import { TagModule } from 'primeng/tag';
 
 @Component({
     selector: 'app-events',
-    imports: [CommonModule, ButtonModule, InputTextModule, AutoCompleteModule, TableModule, ToolbarModule, IconFieldModule, InputIconModule, InputNumberModule, DialogModule, FormsModule, ToastModule, DatePickerModule, TextareaModule],
+    imports: [CommonModule, ButtonModule, InputTextModule, TagModule, AutoCompleteModule, TableModule, ToolbarModule, IconFieldModule, InputIconModule, InputNumberModule, DialogModule, FormsModule, ToastModule, DatePickerModule, TextareaModule],
     standalone: true,
     templateUrl: './events.html',
     providers: [MessageService]
 })
 export class Events {
     submitted: boolean = false;
+
+    statusLabels: { [key: string]: string } = {
+        pending: 'Por Liquidar',
+        completed: 'Finalizado',
+        inQuote: 'En Cotización'
+    };
 
     event!: EventFesta;
 
@@ -173,13 +180,37 @@ export class Events {
         return this.customerService.getCustomerByName(term).pipe(map((data: any) => data.data));
     }
 
+    getSeverity(status: string) {
+        switch (status) {
+            case 'pending':
+                return 'danger';
+
+            case 'completed':
+                return 'success';
+
+            case 'inQuote':
+                return 'info';
+        }
+
+        return 'info';
+    }
+
     private getAllEvent() {
         this.eventService
             .getAllEvents()
-            .pipe(takeUntil(this.destroy$))
+            .pipe(
+                takeUntil(this.destroy$),
+                map((res: any) => res.data),
+                map((res: any) =>
+                    res.map((event: any) => {
+                        const statusLabel = this.statusLabels[event.status] || 'En Cotización';
+                        return { ...event, statusLabel };
+                    })
+                )
+            )
             .subscribe({
                 next: (data: any) => {
-                    this.events.set(data.data);
+                    this.events.set(data);
                 },
                 error: () => {
                     this.service.add({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar las cotizaciones.' });

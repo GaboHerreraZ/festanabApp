@@ -9,16 +9,38 @@ import { Clipboard } from '@angular/cdk/clipboard';
 import { TooltipModule } from 'primeng/tooltip';
 import { exportToExcel } from '../../../../shared/utils/export-event';
 import { MaskPipe } from '../../../../shared/pipes/hide-maks';
+import { SelectChangeEvent, SelectModule } from 'primeng/select';
+import { FormsModule } from '@angular/forms';
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
     selector: 'app-event-detail',
-    imports: [TabsModule, RouterModule, CommonModule, ButtonModule, TooltipModule, MaskPipe],
+    imports: [TabsModule, RouterModule, CommonModule, ButtonModule, TooltipModule, MaskPipe, SelectModule, FormsModule, ToastModule],
+    providers: [MessageService],
     standalone: true,
     templateUrl: './event-detail.html'
 })
 export class EventDetail implements OnInit {
     activeRoute = inject(ActivatedRoute);
+    messageService = inject(MessageService);
 
+    status: string = 'inQuote';
+
+    eventStatus = [
+        {
+            key: 'inQuote',
+            value: 'En Cotización'
+        },
+        {
+            key: 'pending',
+            value: 'Por Liquidar'
+        },
+        {
+            key: 'completed',
+            value: 'Finalizado'
+        }
+    ];
     eventService = inject(EventsService);
     utility = signal<number>(0);
 
@@ -35,7 +57,8 @@ export class EventDetail implements OnInit {
         totalBillValue: 0,
         totalCostPrice: 0,
         totalHourCost: 0,
-        totalRentalPrice: 0
+        totalRentalPrice: 0,
+        status: ''
     };
 
     tabs = [
@@ -88,6 +111,17 @@ export class EventDetail implements OnInit {
         };
     }
 
+    updateStatus(status: SelectChangeEvent) {
+        this.eventService.updateEventStatusById(this.eventService.eventId$(), status.value).subscribe(() => {
+            this.messageService.add({
+                severity: 'success',
+                summary: 'Successful',
+                detail: 'Cotización eliminada correctamente',
+                life: 3000
+            });
+        });
+    }
+
     private getEventDetail(id: string) {
         if (!id) {
             return;
@@ -95,6 +129,7 @@ export class EventDetail implements OnInit {
 
         return this.eventService.getTotalsByEventId(id).subscribe((totals: any) => {
             this.totalEvent = totals.data;
+            this.totalEvent.status = this.totalEvent.status || 'inQuote';
             this.utility.set(this.totalEvent.totalRentalPrice - this.totalEvent.totalHourCost - this.totalEvent.totalBillValue);
         });
     }

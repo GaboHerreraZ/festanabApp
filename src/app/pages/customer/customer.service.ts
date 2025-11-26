@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { ApiService } from '../../core/services/api';
-import { Customer } from '../../core/models/customer';
+import { ICustomer } from '../../core/models/customer';
 
 @Injectable({
     providedIn: 'root'
@@ -13,11 +13,11 @@ export class CustomerService {
     constructor() {}
 
     getAllCustomers() {
-        return this.apiService.get<Customer[]>(`${this.PATH}/get-customers`);
+        return this.apiService.get<ICustomer[]>(`${this.PATH}/get-customers`);
     }
 
-    addEditCustomer(customer: Customer) {
-        return this.apiService.post<Customer>(`${this.PATH}/add-edit-customer`, {
+    addEditCustomer(customer: ICustomer) {
+        return this.apiService.post<ICustomer>(`${this.PATH}/add-edit-customer`, {
             _id: customer._id || undefined,
             name: customer.name,
             nit: customer.nit
@@ -25,6 +25,6 @@ export class CustomerService {
     }
 
     getCustomerByName(name: string) {
-        return this.apiService.get<Customer[]>(`${this.PATH}/get-customer-by-name/${encodeURIComponent(name)}`);
+        return this.apiService.get<ICustomer[]>(`${this.PATH}/get-customer-by-name/${encodeURIComponent(name)}`);
     }
 }

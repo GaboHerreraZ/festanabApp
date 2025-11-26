@@ -1,15 +1,60 @@
+@let lEmployees = employeesList();
+
 <p-toast />
+
 <div class="card">
     <div class="font-semibold text-xl mb-4">Empleados</div>
     <p-toolbar styleClass="mb-6">
         <ng-template #start>
-            <p-button label="Nuevo Empleado" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+            <p-button label="Agregar Empleado" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="employeeDialog = true" />
+        </ng-template>
+    </p-toolbar>
+    <app-table [parentId]="''" [tableSettings]="tableSettings" [title]="'Administrar Empleados'" [data]="lEmployees" />
+</div>
+
+<p-dialog [(visible)]="employeeDialog" [style]="{ width: '450px' }" header="Detalle del Empleado" [modal]="true">
+    <ng-template #content>
+        <form [formGroup]="form">
+            <div class="flex flex-col gap-6">
+                <div>
+                    <label for="name" class="block font-bold mb-3">Nombre</label>
+                    <input type="text" pInputText id="name" formControlName="name" required autofocus fluid />
+                    <small class="text-red-500" *ngIf="form.get('name')?.touched && form.get('name')?.hasError('required')">Nombre es requerido.</small>
+                </div>
+
+                <div>
+                    <label for="cc" class="block font-bold mb-3">Cédula</label>
+                    <input type="text" pInputText id="nit" formControlName="cc" required autofocus fluid />
+                    <small class="text-red-500" *ngIf="form.get('cc')?.touched && form.get('cc')?.hasError('required')">Cédula es requerida.</small>
+                </div>
+
+                <div>
+                    <label for="price" class="block font-bold mb-3">Precio Hora</label>
+                    <p-inputnumber id="price" formControlName="hourPrice" mode="currency" [minFractionDigits]="0" currency="COP" fluid />
+                    <small class="text-red-500" *ngIf="form.get('hourPrice')?.touched && form.get('hourPrice')?.hasError('required')">Precio hora es requerido.</small>
+                </div>
+            </div>
+        </form>
+    </ng-template>
+
+    <ng-template #footer>
+        <p-button label="Cancelar" icon="pi pi-times" text (click)="employeeDialog = false" />
+        <p-button label="Guardar" icon="pi pi-check" (click)="saveEmployee()" [disabled]="form.invalid" />
+    </ng-template>
+</p-dialog>
+
+<!--
+<div class="card">
+    <div class="font-semibold text-xl mb-4">Empleados</div>
+    <p-toolbar styleClass="mb-6">
+        <ng-template #start>
+            <p-button label="Nuevo Empleado" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="employeeDialog = true" />
         </ng-template>
     </p-toolbar>
 
     <p-table
         #dt
-        [value]="employees()"
+        [value]="employees"
         [rows]="10"
         [columns]="cols"
         [paginator]="true"
@@ -52,7 +97,6 @@
             <tr>
                 <td>
                     <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editEmployee(employee)" />
-                    <!-- <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteProduct(product)" /> -->
                 </td>
                 <td style="min-width: 12rem">{{ employee.name }}</td>
                 <td style="min-width: 16rem">{{ employee.cc }}</td>
@@ -61,32 +105,6 @@
         </ng-template>
     </p-table>
 
-    <p-dialog [(visible)]="employeeDialog" [style]="{ width: '450px' }" header="Detalle del Empleado" [modal]="true">
-        <ng-template #content>
-            <div class="flex flex-col gap-6">
-                <div>
-                    <label for="name" class="block font-bold mb-3">Nombre</label>
-                    <input type="text" pInputText id="name" [(ngModel)]="employee.name" required autofocus fluid />
-                    <small class="text-red-500" *ngIf="submitted && !employee.name">Nombre es requerido.</small>
-                </div>
 
-                <div>
-                    <label for="cc" class="block font-bold mb-3">Cédula</label>
-                    <p-inputnumber id="cc" [(ngModel)]="employee.cc" fluid />
-                    <small class="text-red-500" *ngIf="submitted && !employee.cc">Cédula es requerida.</small>
-                </div>
-
-                <div>
-                    <label for="price" class="block font-bold mb-3">Precio Hora</label>
-                    <p-inputnumber id="price" [(ngModel)]="employee.hourPrice" mode="currency" [minFractionDigits]="0" currency="COP" fluid />
-                    <small class="text-red-500" *ngIf="submitted && !employee.hourPrice">Precio hora es requerido.</small>
-                </div>
-            </div>
-        </ng-template>
-
-        <ng-template #footer>
-            <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
-            <p-button label="Guardar" icon="pi pi-check" (click)="saveEmployee()" />
-        </ng-template>
-    </p-dialog>
 </div>
+ -->

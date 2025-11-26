@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
@@ -8,41 +8,88 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
-import { Table, TableModule } from 'primeng/table';
+import { Table as TableModel, TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
-import { Employee as Model } from '../../core/models/employee';
-import { Column } from '../../core/models/column';
-import { Subject, takeUntil } from 'rxjs';
+import { IEmployee } from '../../core/models/employee';
+import { BehaviorSubject, catchError, map, of, Subject, switchMap, takeUntil } from 'rxjs';
 import { EmployeeService } from './employee.service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { TableSettings } from '../../core/models/table-setting';
+import { Table } from '../../shared/components/table/table';
 
 @Component({
     selector: 'app-employee',
-    imports: [CommonModule, ButtonModule, InputTextModule, TableModule, ToolbarModule, IconFieldModule, InputIconModule, InputNumberModule, DialogModule, FormsModule, ToastModule],
+    imports: [CommonModule, Table, ButtonModule, InputTextModule, TableModule, ToolbarModule, IconFieldModule, InputIconModule, InputNumberModule, DialogModule, FormsModule, ToastModule, ReactiveFormsModule],
     standalone: true,
     templateUrl: './employee.html',
     providers: [MessageService]
 })
 export class Employee implements OnInit, OnDestroy {
-    submitted: boolean = false;
-
-    employee!: Model;
-
+    form!: FormGroup;
+    refresh$ = new BehaviorSubject<void>(undefined);
     employeeDialog: boolean = false;
 
-    employees = signal<Model[]>([]);
-
-    cols!: Column[];
+    employeeService = inject(EmployeeService);
+    service = inject(MessageService);
 
     destroy$ = new Subject<void>();
 
-    employeeService = inject(EmployeeService);
+    employeesList$ = this.refresh$.pipe(
+        switchMap(() =>
+            this.employeeService.getAllEmployee().pipe(
+                takeUntil(this.destroy$),
+                map((data: any) => data.data),
+                catchError(() => {
+                    this.service.add({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar el listado de empleados.' });
+                    return of([]);
+                })
+            )
+        )
+    );
+    employeesList = toSignal(this.employeesList$, { initialValue: [] });
 
-    constructor(private service: MessageService) {}
+    tableSettings: TableSettings = {
+        includesTotal: true,
+        columns: [
+            { field: 'name', header: 'Nombre' },
+            { field: 'cc', header: 'Cédula / Nit' },
+            { field: 'hourPrice', header: 'Precio Hora' }
+        ],
+        globalFiltes: ['name', 'cc', 'hourPrice'],
+        header: [
+            {
+                pipe: null,
+                id: 'name',
+                title: 'Nombre',
+                size: '16rem'
+            },
+            {
+                pipe: null,
+                id: 'cc',
+                title: 'Cédula',
+                size: '16rem'
+            },
+            {
+                pipe: 'price',
+                id: 'hourPrice',
+                title: 'Precio Hora',
+                size: '16rem'
+            }
+        ],
+        actions: [
+            {
+                id: 'edit',
+                icon: 'pi pi-pencil',
+                action: (row: any) => this.editEmployee(row)
+            }
+        ]
+    };
+
+    constructor(private fb: FormBuilder) {}
 
     ngOnInit() {
         this.loadData();
-        this.getAllEmployees();
     }
 
     ngOnDestroy(): void {
@@ -50,75 +97,56 @@ export class Employee implements OnInit, OnDestroy {
         this.destroy$.complete();
     }
 
-    openNew() {
-        this.employee = {};
-        this.submitted = false;
-        this.employeeDialog = true;
-    }
-
-    onGlobalFilter(table: Table, event: Event) {
+    onGlobalFilter(table: TableModel, event: Event) {
         table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
     }
 
-    hideDialog() {
-        this.employeeDialog = false;
-        this.submitted = false;
+    saveEmployee() {
+        const { name, cc, hourPrice, _id } = this.form.value;
+
+        const employee: IEmployee = {
+            name,
+            cc,
+            hourPrice,
+            _id
+        };
+
+        this.employeeService
+            .addEditEmployee(employee)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: () => {
+                    this.service.add({ severity: 'success', summary: 'Successful', detail: 'Empleado guardado correctamente.', life: 3000 });
+                    this.refresh$.next();
+                },
+                error: () => {
+                    this.service.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar el Empleado.' });
+                },
+                complete: () => {
+                    this.employeeDialog = false;
+                }
+            });
     }
 
-    saveEmployee() {
-        this.submitted = true;
-        let _employees = this.employees();
-        if (!this.employee.name?.trim() || !this.employee.cc || !this.employee.hourPrice) {
-            return;
+    editEmployee(employee: any) {
+        if (employee) {
+            const { name, cc, hourPrice, _id } = employee.item;
+            this.form.setValue({ _id, name, cc, hourPrice });
         }
 
-        this.employeeService.addEditEmployee(this.employee).subscribe({
-            next: (data: any) => {
-                this.service.add({ severity: 'success', summary: 'Successful', detail: 'Empleado guardado correctamente.', life: 3000 });
-
-                const exist = _employees.some((item) => item._id === data.data._id);
-                if (exist) {
-                    _employees = _employees.map((item) => (item._id === data.data._id ? data.data : item));
-                } else {
-                    _employees.push(data.data);
-                }
-
-                this.employees.set([..._employees]);
-            },
-            error: () => {
-                this.service.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar el Empleado.' });
-            },
-            complete: () => {
-                this.employeeDialog = false;
-                this.employee = {};
-            }
-        });
-    }
-
-    editEmployee(employee: Model) {
-        this.employee = { ...employee };
         this.employeeDialog = true;
     }
 
     private loadData() {
-        this.cols = [
-            { field: 'name', header: 'Nombre' },
-            { field: 'cc', header: 'Cédula' },
-            { field: 'hourPrice', header: 'Precio Hora' }
-        ];
+        this.setForm();
     }
 
-    private getAllEmployees() {
-        this.employeeService
-            .getAllEmployee()
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-                next: (data: any) => {
-                    this.employees.set(data.data);
-                },
-                error: () => {
-                    this.service.add({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar el listado de empleados.' });
-                }
-            });
+    private setForm() {
+        this.form = this.fb.group({
+            _id: [''],
+            name: ['', Validators.required],
+            hourPrice: ['', Validators.required],
+            cc: ['', Validators.required]
+        });
     }
 }

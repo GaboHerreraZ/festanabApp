@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { ApiService } from '../../core/services/api';
-import { Employee } from '../../core/models/employee';
+import { IEmployee } from '../../core/models/employee';
 
 @Injectable({
     providedIn: 'root'
@@ -13,11 +13,11 @@ export class EmployeeService {
     constructor() {}
 
     getAllEmployee() {
-        return this.apiService.get<Employee[]>(`${this.PATH}/get-employees`);
+        return this.apiService.get<IEmployee[]>(`${this.PATH}/get-employees`);
     }
 
-    addEditEmployee(employee: Employee) {
-        return this.apiService.post<Employee>(`${this.PATH}/add-edit-employee`, {
+    addEditEmployee(employee: IEmployee) {
+        return this.apiService.post<IEmployee>(`${this.PATH}/add-edit-employee`, {
             _id: employee._id || undefined,
             name: employee.name,
             hourPrice: employee.hourPrice,

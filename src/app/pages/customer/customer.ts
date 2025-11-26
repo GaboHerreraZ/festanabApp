@@ -1,39 +1,45 @@
-import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, inject, OnDestroy } from '@angular/core';
 import { Table } from '../../shared/components/table/table';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 import { ToolbarModule } from 'primeng/toolbar';
 import { InputTextModule } from 'primeng/inputtext';
 import { ToastModule } from 'primeng/toast';
 import { TableSettings } from '../../core/models/table-setting';
-import { Customer as Model } from '../../core/models/customer';
+import { ICustomer } from '../../core/models/customer';
 import { CustomerService } from './customer.service';
-import { Subject, takeUntil } from 'rxjs';
+import { BehaviorSubject, catchError, map, of, Subject, switchMap, takeUntil } from 'rxjs';
 import { DialogModule } from 'primeng/dialog';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-customer',
-    imports: [Table, FormsModule, CommonModule, ButtonModule, ToolbarModule, InputTextModule, ToastModule, DialogModule],
-    standalone: true,
     templateUrl: './customer.html',
+    standalone: true,
+    imports: [Table, FormsModule, CommonModule, ButtonModule, ToolbarModule, InputTextModule, ToastModule, DialogModule, ReactiveFormsModule],
     providers: [MessageService]
 })
-export class Customer implements OnInit, OnDestroy {
+export class Customer implements OnDestroy {
     customerService = inject(CustomerService);
-
     destroy$ = new Subject<void>();
-
-    customers = signal<Model[]>([]);
-
-    submitted: boolean = false;
-
-    customer!: Model;
-
+    refresh$ = new BehaviorSubject<void>(undefined);
+    form!: FormGroup;
+    customerList$ = this.refresh$.pipe(
+        switchMap(() =>
+            this.customerService.getAllCustomers().pipe(
+                takeUntil(this.destroy$),
+                map((data: any) => data.data),
+                catchError((e) => {
+                    this.service.add({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar el listado de clientes.' });
+                    return of([]);
+                })
+            )
+        )
+    );
+    customers = toSignal(this.customerList$, { initialValue: [] });
     customerDialog: boolean = false;
-
     tableSettings: TableSettings = {
         includesTotal: true,
         columns: [
@@ -64,10 +70,11 @@ export class Customer implements OnInit, OnDestroy {
         ]
     };
 
-    constructor(private service: MessageService) {}
-
-    ngOnInit(): void {
-        this.getAllCustomer();
+    constructor(
+        private service: MessageService,
+        private fb: FormBuilder
+    ) {
+        this.setForm();
     }
 
     ngOnDestroy(): void {
@@ -76,61 +83,47 @@ export class Customer implements OnInit, OnDestroy {
     }
 
     openNew(row: any = null) {
-        this.customer = {};
-        this.submitted = false;
         if (row) {
-            this.customer = { ...row.item };
+            const { name, nit, _id } = row.item;
+            this.form.setValue({ _id, name, nit });
         }
         this.customerDialog = true;
     }
 
     hideDialog() {
         this.customerDialog = false;
-        this.submitted = false;
     }
 
     saveCustomer() {
-        this.submitted = true;
-        let _customers = this.customers();
-        if (!this.customer.name?.trim() || !this.customer.nit?.trim()) {
-            return;
-        }
+        const { name, nit, _id } = this.form.value;
+        const customer: ICustomer = {
+            name,
+            nit,
+            _id
+        };
 
-        this.customerService.addEditCustomer(this.customer).subscribe({
-            next: (data: any) => {
-                this.service.add({ severity: 'success', summary: 'Successful', detail: 'Empleado guardado correctamente.', life: 3000 });
-
-                const exist = _customers.some((item) => item._id === data.data._id);
-                if (exist) {
-                    _customers = _customers.map((item) => (item._id === data.data._id ? data.data : item));
-                } else {
-                    _customers.push(data.data);
-                }
-
-                this.customers.set([..._customers]);
-            },
-            error: () => {
-                this.service.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar el Empleado.' });
-            },
-            complete: () => {
-                this.customerDialog = false;
-                this.customer = {};
-                this.submitted = false;
-            }
-        });
-    }
-
-    private getAllCustomer() {
         this.customerService
-            .getAllCustomers()
+            .addEditCustomer(customer)
             .pipe(takeUntil(this.destroy$))
             .subscribe({
-                next: (data: any) => {
-                    this.customers.set(data.data);
+                next: () => {
+                    this.service.add({ severity: 'success', summary: 'Successful', detail: 'Empleado guardado correctamente.', life: 3000 });
+                    this.refresh$.next();
                 },
                 error: () => {
-                    this.service.add({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar el listado de clientes.' });
+                    this.service.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar el Empleado.' });
+                },
+                complete: () => {
+                    this.customerDialog = false;
                 }
             });
+    }
+
+    private setForm() {
+        this.form = this.fb.group({
+            _id: [''],
+            name: ['', Validators.required],
+            nit: ['', Validators.required]
+        });
     }
 }

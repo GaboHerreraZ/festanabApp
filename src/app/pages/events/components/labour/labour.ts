@@ -15,7 +15,7 @@ import { EventsService } from '../../events.service';
 import { Table } from '../../../../shared/components/table/table';
 import { EmployeeService } from '../../../employee/employee.service';
 import { AutoCompleteCompleteEvent, AutoCompleteModule, AutoCompleteSelectEvent } from 'primeng/autocomplete';
-import { Employee } from '../../../../core/models/employee';
+import { IEmployee } from '../../../../core/models/employee';
 import { Subject, takeUntil } from 'rxjs';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { CommonModule } from '@angular/common';
@@ -36,8 +36,8 @@ export class Labour implements OnInit, OnDestroy {
 
     hours = signal<Hour[]>([]);
 
-    employeeSearch: Employee[] = [];
-    employees = signal<Employee[]>([]);
+    employeeSearch: IEmployee[] = [];
+    employees = signal<IEmployee[]>([]);
 
     destroy$ = new Subject<void>();
 

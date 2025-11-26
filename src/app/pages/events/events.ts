@@ -18,7 +18,7 @@ import { MessageService } from 'primeng/api';
 import { DatePickerModule } from 'primeng/datepicker';
 import { TextareaModule } from 'primeng/textarea';
 import { Router } from '@angular/router';
-import { Customer } from '../../core/models/customer';
+import { ICustomer } from '../../core/models/customer';
 import { AutoCompleteCompleteEvent, AutoCompleteModule, AutoCompleteSelectEvent } from 'primeng/autocomplete';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CustomerService } from '../customer/customer.service';
@@ -38,8 +38,8 @@ export class Events {
     eventDialog: boolean = false;
 
     events = signal<EventFesta[]>([]);
-    customerSearch: Customer[] = [];
-    customers = signal<Customer[]>([]);
+    customerSearch: ICustomer[] = [];
+    customers = signal<ICustomer[]>([]);
 
     cols!: Column[];
 

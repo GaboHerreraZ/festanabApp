@@ -3,7 +3,7 @@ import { ApiService } from '../../core/services/api';
 import { Event } from '../../core/models/event';
 import { Item } from '../../core/models/event-detail.model';
 import { Bill } from '../../core/models/bill';
-import { Hour } from '../../core/models/hour';
+import { IHour } from '../../core/models/hour';
 import { CustomerQuote } from '../../core/models/customer-quote';
 import { Observable } from 'rxjs';
 
@@ -74,11 +74,11 @@ export class EventsService {
         return this.apiService.get(`${this.PATH}/get-hours-by-event-id/${eventId}`);
     }
 
-    addNewHour(hour: Hour) {
+    addNewHour(hour: IHour) {
         return this.apiService.post(`${this.PATH}/add-hour`, hour);
     }
 
-    editHour(hour: Hour) {
+    editHour(hour: IHour) {
         return this.apiService.post(`${this.PATH}/edit-hour`, hour);
     }
 

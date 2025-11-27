@@ -1,4 +1,4 @@
-export interface Hour {
+export interface IHour {
     _id: string;
     eventId: string;
     employee: string;
@@ -27,4 +27,5 @@ export interface Hour {
     total: number; // Total de horas
 
     employeeId: string; // ID del empleado
+    hasHour?: boolean;
 }

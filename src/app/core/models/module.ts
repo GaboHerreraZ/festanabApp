@@ -1,4 +1,4 @@
-export interface Module {
+export interface IModule {
     _id?: string;
     module?: string;
 }

@@ -24,4 +24,8 @@ export class EmployeeService {
             cc: employee.cc
         });
     }
+
+    deleteEmployee(employeeId: string) {
+        return this.apiService.delete<{ message: string }>(`${this.PATH}/delete-employee/${employeeId}`);
+    }
 }

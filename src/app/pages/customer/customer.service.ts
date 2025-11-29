@@ -27,4 +27,8 @@ export class CustomerService {
     getCustomerByName(name: string) {
         return this.apiService.get<ICustomer[]>(`${this.PATH}/get-customer-by-name/${encodeURIComponent(name)}`);
     }
+
+    deleteCustomer(customerId: string) {
+        return this.apiService.delete<{ message: string }>(`${this.PATH}/delete-customer/${customerId}`);
+    }
 }

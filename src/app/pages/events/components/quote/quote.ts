@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { FormsModule } from '@angular/forms';
 import { SettingService } from '../../../settings/settings.service';
-import { Module } from '../../../../core/models/module';
+import { IModule } from '../../../../core/models/module';
 import { debounceTime, distinctUntilChanged, map, of, Subject, switchMap, takeUntil } from 'rxjs';
 import { EventsService } from '../../events.service';
 import { ActivatedRoute } from '@angular/router';
@@ -53,14 +53,14 @@ import { toSignal } from '@angular/core/rxjs-interop';
 })
 export class Quote implements OnInit {
     submitted: boolean = false;
-    sections = signal<Module[]>([]);
+    sections = signal<IModule[]>([]);
     clientSections: Signal<Section[]> = computed(() => this.eventDetail().section.filter((s) => s.type === 'client'));
     adminSections: Signal<Section[]> = computed(() => this.eventDetail().section.filter((s) => s.type === 'admin'));
 
     inventory = signal<Product[]>([]);
     inventorySearch: Product[] = [];
 
-    selectedSection!: Module;
+    selectedSection!: IModule;
     settingService = inject(SettingService);
     eventService = inject(EventsService);
     inventoryService = inject(InventoryService);

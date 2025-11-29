@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { IconFieldModule } from 'primeng/iconfield';
@@ -17,13 +17,14 @@ import { EmployeeService } from './employee.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TableSettings } from '../../core/models/table-setting';
 import { Table } from '../../shared/components/table/table';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 @Component({
     selector: 'app-employee',
-    imports: [CommonModule, Table, ButtonModule, InputTextModule, TableModule, ToolbarModule, IconFieldModule, InputIconModule, InputNumberModule, DialogModule, FormsModule, ToastModule, ReactiveFormsModule],
+    imports: [CommonModule, Table, ButtonModule, ConfirmDialogModule, InputTextModule, TableModule, ToolbarModule, IconFieldModule, InputIconModule, InputNumberModule, DialogModule, FormsModule, ToastModule, ReactiveFormsModule],
     standalone: true,
     templateUrl: './employee.html',
-    providers: [MessageService]
+    providers: [MessageService, ConfirmationService]
 })
 export class Employee implements OnInit, OnDestroy {
     form!: FormGroup;
@@ -31,6 +32,8 @@ export class Employee implements OnInit, OnDestroy {
     employeeDialog: boolean = false;
 
     employeeService = inject(EmployeeService);
+    confirmationService = inject(ConfirmationService);
+
     service = inject(MessageService);
 
     destroy$ = new Subject<void>();
@@ -82,6 +85,11 @@ export class Employee implements OnInit, OnDestroy {
                 id: 'edit',
                 icon: 'pi pi-pencil',
                 action: (row: any) => this.editEmployee(row)
+            },
+            {
+                id: 'delete',
+                icon: 'pi pi-trash',
+                action: (rowData: any) => this.deleteEmployee(rowData.item)
             }
         ]
     };
@@ -139,6 +147,25 @@ export class Employee implements OnInit, OnDestroy {
 
     private loadData() {
         this.setForm();
+    }
+
+    private deleteEmployee(employee: IEmployee) {
+        this.confirmationService.confirm({
+            message: '¿Está seguro de eliminar el empleado: ' + employee.name + '?',
+            header: 'Confirmar',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Sí',
+            rejectLabel: 'No',
+            accept: () => {
+                this.employeeService
+                    .deleteEmployee(employee._id!)
+                    .pipe(takeUntil(this.destroy$))
+                    .subscribe(() => {
+                        this.service.add({ severity: 'success', summary: 'Successful', detail: 'Empleado eliminado correctamente', life: 3000 });
+                        this.refresh$.next();
+                    });
+            }
+        });
     }
 
     private setForm() {

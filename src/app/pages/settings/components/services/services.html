@@ -1,0 +1,44 @@
+@let lServices = services();
+
+<p-toast />
+
+<div class="card">
+    <div class="font-semibold text-xl mb-4">Servicios</div>
+    <p-toolbar styleClass="mb-6">
+        <ng-template #start>
+            <p-button label="Agregar Servicio" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="newService()" />
+        </ng-template>
+    </p-toolbar>
+    <app-table [parentId]="''" [tableSettings]="tableSettings" [title]="'Administrar Servicios'" [data]="lServices" />
+</div>
+
+<p-dialog [(visible)]="serviceDialog" [style]="{ width: '450px' }" header="Detalle del Servicio" [modal]="true">
+    <ng-template #content>
+        <form [formGroup]="form">
+            <div class="flex flex-col gap-6">
+                <div>
+                    <label for="service" class="block font-bold mb-3">Servicio</label>
+                    <input type="text" pInputText id="service" formControlName="service" required autofocus fluid />
+                    <small class="text-red-500" *ngIf="form.get('service')?.touched && form.get('service')?.hasError('required')">Servicio es requerido.</small>
+                </div>
+                <div>
+                    <label for="price" class="block font-bold mb-3">Precio</label>
+                    <p-inputnumber id="price" formControlName="price" mode="currency" [minFractionDigits]="0" currency="COP" fluid />
+                    <small class="text-red-500" *ngIf="form.get('price')?.touched && form.get('price')?.hasError('required')">Precio es requerido.</small>
+                </div>
+
+                <div>
+                    <label for="description" class="block font-bold mb-3">Descripción</label>
+                    <textarea class="w-full" rows="4" formControlName="description" maxlength="100" cols="30" pTextarea></textarea>
+                </div>
+            </div>
+        </form>
+    </ng-template>
+
+    <ng-template #footer>
+        <p-button label="Cancelar" icon="pi pi-times" text (click)="serviceDialog = false" />
+        <p-button label="Guardar" icon="pi pi-check" (click)="saveService()" [disabled]="form.invalid" />
+    </ng-template>
+</p-dialog>
+
+<p-confirmdialog [style]="{ width: '450px' }" />

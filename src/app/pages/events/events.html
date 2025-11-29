@@ -67,7 +67,7 @@
         </ng-template>
         <ng-template #body let-event>
             <tr>
-                <td>
+                <td style="min-width: 12rem">
                     <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editEvent(event)" />
                     <p-button icon="pi pi-pen-to-square" class="mr-2" [rounded]="true" [outlined]="true" (click)="goEventDetail(event)" />
                     <p-button icon="pi pi-clone" class="mr-2" [rounded]="true" [outlined]="true" (click)="clone(event)" />

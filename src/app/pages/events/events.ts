@@ -45,7 +45,9 @@ export class Events {
     eventDialog: boolean = false;
 
     events = signal<EventFesta[]>([]);
+
     customerSearch: ICustomer[] = [];
+
     customers = signal<ICustomer[]>([]);
 
     cols!: Column[];
@@ -55,6 +57,7 @@ export class Events {
     destroy$ = new Subject<void>();
 
     eventService = inject(EventsService);
+
     customerService = inject(CustomerService);
 
     router = inject(Router);

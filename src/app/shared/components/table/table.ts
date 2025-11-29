@@ -19,6 +19,7 @@ import { TagModule } from 'primeng/tag';
 })
 export class Table {
     @Input() data: any[] = [];
+
     @Input() parentId!: string;
 
     @Input() title!: string;

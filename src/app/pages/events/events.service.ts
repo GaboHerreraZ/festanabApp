@@ -17,8 +17,8 @@ export class EventsService {
 
     apiService = inject(ApiService);
 
-    getAllEvents() {
-        return this.apiService.get<Event[]>(`${this.PATH}/get-events`);
+    getAllEvents(status: string) {
+        return this.apiService.get<Event[]>(`${this.PATH}/get-events/${status}`);
     }
 
     getEvent(id: string) {
@@ -34,7 +34,8 @@ export class EventsService {
             nit: event.nit,
             location: event.location,
             time: event.time,
-            customerId: event.customerId
+            customerId: event.customerId,
+            status: event.status
         });
     }
 
@@ -104,6 +105,10 @@ export class EventsService {
 
     cloneEvent(eventId: string) {
         return this.apiService.get(`${this.PATH}/clone-event/${eventId}`);
+    }
+
+    deleteEventById(eventId: string) {
+        return this.apiService.delete(`${this.PATH}/delete-event/${eventId}`);
     }
 
     newCustomerQuote(eventId: string): Observable<CustomerQuote> {

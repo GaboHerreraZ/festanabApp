@@ -1,18 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { Component, effect, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, inject } from '@angular/core';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
-import { Table, TableModule } from 'primeng/table';
+import { Table as TablePrime, TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { Event as EventFesta } from '../../core/models/event';
-import { Column } from '../../core/models/column';
-import { debounceTime, distinctUntilChanged, map, of, Subject, switchMap, takeUntil } from 'rxjs';
+import { BehaviorSubject, catchError, debounceTime, distinctUntilChanged, map, of, Subject, switchMap, take, takeUntil } from 'rxjs';
 import { EventsService } from './events.service';
 import { MessageService } from 'primeng/api';
 import { DatePickerModule } from 'primeng/datepicker';
@@ -23,16 +22,92 @@ import { AutoCompleteCompleteEvent, AutoCompleteModule, AutoCompleteSelectEvent 
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CustomerService } from '../customer/customer.service';
 import { TagModule } from 'primeng/tag';
+import { Table } from '../../shared/components/table/table';
+import { TableSettings } from '../../core/models/table-setting';
+import { SelectModule } from 'primeng/select';
 
 @Component({
     selector: 'app-events',
-    imports: [CommonModule, ButtonModule, InputTextModule, TagModule, AutoCompleteModule, TableModule, ToolbarModule, IconFieldModule, InputIconModule, InputNumberModule, DialogModule, FormsModule, ToastModule, DatePickerModule, TextareaModule],
+    imports: [
+        CommonModule,
+        Table,
+        ButtonModule,
+        InputTextModule,
+        TagModule,
+        AutoCompleteModule,
+        TableModule,
+        ToolbarModule,
+        IconFieldModule,
+        InputIconModule,
+        InputNumberModule,
+        DialogModule,
+        FormsModule,
+        ToastModule,
+        DatePickerModule,
+        TextareaModule,
+        ReactiveFormsModule,
+        SelectModule
+    ],
     standalone: true,
     templateUrl: './events.html',
     providers: [MessageService]
 })
 export class Events {
-    submitted: boolean = false;
+    eventStatus = [
+        {
+            key: 'inQuote',
+            value: 'En Cotización'
+        },
+        {
+            key: 'pending',
+            value: 'Por Liquidar'
+        },
+        {
+            key: 'completed',
+            value: 'Finalizado'
+        }
+    ];
+
+    eventService = inject(EventsService);
+
+    customerService = inject(CustomerService);
+
+    service = inject(MessageService);
+
+    destroy$ = new Subject<void>();
+
+    refresh$ = new BehaviorSubject<string>('inQuote');
+
+    private searchTerm$ = new Subject<string>();
+
+    suggestions$ = this.searchTerm$.pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap((term) => this.fetchSuggestions(term))
+    );
+
+    suggestionsSignal = toSignal(this.suggestions$, { initialValue: [] });
+
+    events$ = this.refresh$.pipe(
+        switchMap((status: string) =>
+            this.eventService.getAllEvents(status).pipe(
+                takeUntil(this.destroy$),
+                map((res: any) => res.data),
+                map((res: any) =>
+                    res.map((event: any) => {
+                        const statusLabel = this.statusLabels[event.status] || 'En Cotización';
+                        return { ...event, statusLabel };
+                    })
+                ),
+                catchError((e) => {
+                    this.service.add({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar las cotizaciones.' });
+                    return of([]);
+                })
+            )
+        )
+    );
+
+    events = toSignal(this.events$, { initialValue: [] });
 
     statusLabels: { [key: string]: string } = {
         pending: 'Por Liquidar',
@@ -40,44 +115,96 @@ export class Events {
         inQuote: 'En Cotización'
     };
 
-    event!: EventFesta;
+    form!: FormGroup;
 
     eventDialog: boolean = false;
 
-    events = signal<EventFesta[]>([]);
-
     customerSearch: ICustomer[] = [];
-
-    customers = signal<ICustomer[]>([]);
-
-    cols!: Column[];
-
-    private searchTerm$ = new Subject<string>();
-
-    destroy$ = new Subject<void>();
-
-    eventService = inject(EventsService);
-
-    customerService = inject(CustomerService);
 
     router = inject(Router);
 
-    constructor(private service: MessageService) {
-        const suggestions$ = this.searchTerm$.pipe(
-            debounceTime(300),
-            distinctUntilChanged(),
-            switchMap((term) => this.fetchSuggestions(term))
-        );
+    tableSettings: TableSettings = {
+        includesTotal: true,
+        columns: [
+            { field: 'status', header: 'Estado' },
+            { field: 'name', header: 'Nombre' },
+            { field: 'nit', header: 'Cédula / Nit' },
+            { field: 'description', header: 'Tipo de Evento' },
+            { field: 'location', header: 'Ubicación' },
+            { field: 'date', header: 'Fecha Evento' },
+            { field: 'time', header: 'Hora Evento' }
+        ],
+        globalFiltes: ['name', 'nit'],
+        header: [
+            {
+                pipe: null,
+                id: 'status',
+                title: 'Estado',
+                size: '10rem',
+                type: 'tag'
+            },
+            {
+                pipe: null,
+                id: 'owner',
+                title: 'Nombre',
+                size: '16rem'
+            },
+            {
+                pipe: null,
+                id: 'nit',
+                title: 'Cédula / Nit',
+                size: '10rem'
+            },
+            {
+                pipe: null,
+                id: 'description',
+                title: 'Tipo de Evento',
+                size: '16rem'
+            },
+            {
+                pipe: null,
+                id: 'location',
+                title: 'Ubicación',
+                size: '16rem'
+            },
+            {
+                pipe: 'date',
+                id: 'date',
+                title: 'Fecha Evento',
+                size: '16rem'
+            },
+            {
+                pipe: 'time',
+                id: 'time',
+                title: 'Hora Evento',
+                size: '10rem'
+            }
+        ],
+        actions: [
+            {
+                id: 'edit',
+                icon: 'pi pi-pencil',
+                action: (row: any) => this.editEvent(row.item)
+            },
+            {
+                id: 'delete',
+                icon: 'pi pi-pen-to-square',
+                action: (rowData: any) => this.goEventDetail(rowData.item)
+            },
+            {
+                id: 'delete',
+                icon: 'pi pi-clone',
+                action: (rowData: any) => this.clone(rowData.item)
+            }
+        ],
+        events: {
+            getSeverity: (rowData: any) => (rowData && this.getSeverity(rowData)) || 'info',
+            getSeverityLabel: (rowData: any) => this.statusLabels[rowData] || 'En Cotización'
+        }
+    };
 
-        const suggestionsSignal = toSignal(suggestions$, { initialValue: [] });
-        effect(() => {
-            this.customers.set(suggestionsSignal());
-        });
-    }
-
-    ngOnInit() {
+    constructor(private fb: FormBuilder) {
         this.loadData();
-        this.getAllEvent();
     }
 
     ngOnDestroy(): void {
@@ -85,79 +212,78 @@ export class Events {
         this.destroy$.complete();
     }
 
+    onFilterEvents(event: any) {
+        console.log(event);
+        this.refresh$.next(event.value);
+    }
+
     onSelectCustomer(customer: AutoCompleteSelectEvent) {
-        this.event.customerId = customer.value._id;
-        this.event.owner = customer.value.name;
-        this.event.nit = customer.value.nit;
+        const { _id, name, nit } = customer.value;
+        this.form.patchValue({
+            customerId: _id,
+            owner: name,
+            nit: nit
+        });
     }
 
     search(event: AutoCompleteCompleteEvent) {
-        this.event.owner = event.query;
         this.searchTerm$.next(event.query);
     }
 
     openNew() {
-        this.event = {};
-        this.submitted = false;
         this.eventDialog = true;
     }
 
-    onGlobalFilter(table: Table, event: Event) {
+    onGlobalFilter(table: TablePrime, event: Event) {
         table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
     }
 
     hideDialog() {
         this.eventDialog = false;
-        this.submitted = false;
     }
 
     clone(event: EventFesta) {
-        this.eventService.cloneEvent(event._id!).subscribe({
-            next: (response: any) => {
-                const { data } = response;
-                this.router.navigate(['/pages/event-detail', data.eventId]);
-            },
-            error: () => {
-                this.service.add({ severity: 'error', summary: 'Error', detail: 'No se pudo clonar el evento.' });
-            }
-        });
+        this.eventService
+            .cloneEvent(event._id!)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: (response: any) => {
+                    const { data } = response;
+                    this.goEventDetail(data);
+                },
+                error: () => {
+                    this.service.add({ severity: 'error', summary: 'Error', detail: 'No se pudo clonar el evento.' });
+                }
+            });
     }
 
     saveEvent() {
-        this.submitted = true;
-        let _events = this.events();
+        const event = this.form.getRawValue();
 
-        if (!this.event.description || !this.event.owner || !this.event.date) {
-            return;
-        }
-
-        this.eventService.addEditEvents(this.event).subscribe({
-            next: (data: any) => {
-                this.service.add({ severity: 'success', summary: 'Successful', detail: 'Evento guardado correctamente.', life: 3000 });
-
-                const exist = _events.some((item) => item._id === data.data._id);
-                if (exist) {
-                    _events = _events.map((item) => (item._id === data.data._id ? data.data : item));
-                } else {
-                    _events.push(data.data);
+        this.eventService
+            .addEditEvents(event)
+            .pipe(
+                takeUntil(this.destroy$),
+                map((res: any) => res.data)
+            )
+            .subscribe({
+                next: (data) => {
+                    this.service.add({ severity: 'success', summary: 'Successful', detail: 'Evento guardado correctamente.', life: 3000 });
+                    this.goEventDetail(data);
+                },
+                error: () => {
+                    this.service.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar el evento.' });
+                },
+                complete: () => {
+                    this.eventDialog = false;
                 }
-
-                this.events.set([..._events]);
-            },
-            error: () => {
-                this.service.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar el evento.' });
-            },
-            complete: () => {
-                this.eventDialog = false;
-                this.submitted = false;
-                this.event = {};
-            }
-        });
+            });
     }
 
     editEvent(event: EventFesta) {
-        this.event = { ...event, date: new Date(event.date!), time: event.time ? new Date(event.time) : undefined };
+        console.log('s', event);
         this.eventDialog = true;
+        this.form.patchValue({ ...event, date: new Date(event.date!), time: event.time ? new Date(event.time) : undefined });
     }
 
     goEventDetail(event: EventFesta) {
@@ -165,18 +291,21 @@ export class Events {
     }
 
     private loadData() {
-        this.cols = [
-            { field: 'owner', header: 'Cliente' },
-            { field: 'nit', header: 'Cédula/Nit' },
-            { field: 'description', header: 'Tipo de Evento' },
-            { field: 'location', header: 'Locación' },
-            { field: 'date', header: 'Fecha' },
-            { field: 'time', header: 'Hora' }
-        ];
+        this.form = this.fb.group({
+            _id: [null],
+            owner: ['', Validators.required],
+            nit: [{ value: '', disabled: true }, Validators.required],
+            description: [''],
+            location: [''],
+            date: [null],
+            time: [null],
+            customerId: [null],
+            status: ['inQuote']
+        });
     }
 
     private fetchSuggestions(term: string) {
-        if (!term || term.length < 2) {
+        if (!term || term.length < 3) {
             return of([]);
         }
 
@@ -196,28 +325,5 @@ export class Events {
         }
 
         return 'info';
-    }
-
-    private getAllEvent() {
-        this.eventService
-            .getAllEvents()
-            .pipe(
-                takeUntil(this.destroy$),
-                map((res: any) => res.data),
-                map((res: any) =>
-                    res.map((event: any) => {
-                        const statusLabel = this.statusLabels[event.status] || 'En Cotización';
-                        return { ...event, statusLabel };
-                    })
-                )
-            )
-            .subscribe({
-                next: (data: any) => {
-                    this.events.set(data);
-                },
-                error: () => {
-                    this.service.add({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar las cotizaciones.' });
-                }
-            });
     }
 }

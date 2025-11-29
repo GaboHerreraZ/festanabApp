@@ -23,6 +23,7 @@
                 </div>
                 <div>
                     <p-select (onChange)="updateStatus($event)" [options]="eventStatus" [(ngModel)]="totalEvent.status" optionLabel="value" optionValue="key" placeholder="Actualizar Estado" class="w-full md:w-44 mr-2" />
+                    <p-button label="Eliminar" class="mr-2" severity="danger" raised (onClick)="deleteEvent()" />
                     <p-button label="Exportar" class="mr-2" severity="success" raised (onClick)="exportEvent()" />
                 </div>
             </div>
@@ -103,6 +104,7 @@
             </div>
             <div class="flex justify-between mt-4">
                 <p-select (onChange)="updateStatus($event)" [options]="eventStatus" size="small" [(ngModel)]="status" optionLabel="value" optionValue="key" placeholder="Actualizar Estado" class="w-full md:w-44 mr-2" />
+                <p-button label="Eliminar" size="small" class="mr-2" severity="danger" raised (onClick)="deleteEvent()" />
                 <p-button label="Exportar" size="small" class="mr-2" severity="success" raised (onClick)="exportEvent()" />
             </div>
         </div>
@@ -123,3 +125,4 @@
         <router-outlet />
     </div>
 </div>
+<p-confirmdialog [style]="{ width: '450px' }" />

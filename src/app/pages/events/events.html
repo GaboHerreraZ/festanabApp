@@ -1,126 +1,51 @@
+@let lEvents = events(); @let lCustomers = suggestionsSignal();
+
 <p-toast />
 <div class="card">
-    <div class="font-semibold text-2xl mb-4">Eventos</div>
-
+    <div class="font-semibold text-xl mb-4">Eventos</div>
     <p-toolbar styleClass="mb-6">
         <ng-template #start>
             <p-button label="Agregar Evento" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+            <p-select (onChange)="onFilterEvents($event)" [options]="eventStatus" optionLabel="value" optionValue="key" placeholder="Filtrar Por" class="w-full md:w-56 mr-2" />
         </ng-template>
     </p-toolbar>
+    <app-table [parentId]="''" [tableSettings]="tableSettings" [title]="'Administrar Eventos'" [data]="lEvents" />
+</div>
 
-    <p-table
-        #dt
-        [value]="events()"
-        [rows]="10"
-        [columns]="cols"
-        [paginator]="true"
-        [globalFilterFields]="['description', 'owner']"
-        [tableStyle]="{ 'min-width': '75rem' }"
-        [rowHover]="true"
-        dataKey="id"
-        currentPageReportTemplate="Mostrando {first} hasta {last} de {totalRecords} eventos"
-        [showCurrentPageReport]="true"
-        [rowsPerPageOptions]="[10, 20, 30]"
-    >
-        <ng-template #caption>
-            <div class="flex md:flex-row flex-col items-center justify-between">
-                <h5 class="m-0">Administrar Eventos</h5>
-                <p-iconfield>
-                    <p-inputicon styleClass="pi pi-search" />
-                    <input class="w-full" pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />
-                </p-iconfield>
-            </div>
-        </ng-template>
-        <ng-template #header>
-            <tr>
-                <th style="min-width: 10rem"></th>
-                <th pSortableColumn="status" style="min-width: 10rem">
-                    Estado
-                    <p-sortIcon field="owner" />
-                </th>
-                <th pSortableColumn="owner" style="min-width: 8rem">
-                    Cliente
-                    <p-sortIcon field="owner" />
-                </th>
-                <th pSortableColumn="nit" style="min-width: 4rem">
-                    Cédula / Nit
-                    <p-sortIcon field="nit" />
-                </th>
-                <th pSortableColumn="description" style="min-width: 12rem">
-                    Tipo de Evento
-                    <p-sortIcon field="description" />
-                </th>
-
-                <th pSortableColumn="location" style="min-width: 12rem">
-                    Locación
-                    <p-sortIcon field="location" />
-                </th>
-                <th pSortableColumn="date" style="min-width: 8rem">
-                    Fecha evento
-                    <p-sortIcon field="date" />
-                </th>
-                <th pSortableColumn="time" style="min-width: 8rem">
-                    Hora
-                    <p-sortIcon field="time" />
-                </th>
-            </tr>
-        </ng-template>
-        <ng-template #body let-event>
-            <tr>
-                <td style="min-width: 12rem">
-                    <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editEvent(event)" />
-                    <p-button icon="pi pi-pen-to-square" class="mr-2" [rounded]="true" [outlined]="true" (click)="goEventDetail(event)" />
-                    <p-button icon="pi pi-clone" class="mr-2" [rounded]="true" [outlined]="true" (click)="clone(event)" />
-                </td>
-                <td>
-                    <p-tag [value]="event.statusLabel" [severity]="getSeverity(event.status)" />
-                </td>
-                <td style="min-width: 14rem">{{ event.owner }}</td>
-                <td style="min-width: 10rem">{{ event.nit }}</td>
-                <td style="min-width: 10rem">{{ event.description }}</td>
-                <td style="min-width: 10rem">{{ event.location }}</td>
-                <td style="min-width: 10rem">{{ event.date | date:'d \'de\' MMMM \'de\' y':'es' }}</td>
-                <td style="min-width: 10rem">{{ event.time | date:'h:mm a' }}</td>
-            </tr>
-        </ng-template>
-    </p-table>
-
-    <p-dialog [(visible)]="eventDialog" [style]="{ width: '450px' }" header="Detalle del Evento" [modal]="true">
-        <ng-template #content>
+<p-dialog [(visible)]="eventDialog" [style]="{ width: '450px' }" header="Detalle del Evento" [modal]="true">
+    <ng-template #content>
+        <form [formGroup]="form">
             <div class="flex flex-col gap-6">
                 <div>
                     <label for="owner" class="block font-bold mb-3">Cliente</label>
-                    <!-- <input type="text" pInputText id="owner" [(ngModel)]="event.owner" required autofocus fluid /> -->
-
-                    <p-autocomplete [(ngModel)]="event.owner" (onSelect)="onSelectCustomer($event)" [suggestions]="customers()" [dropdown]="true" optionLabel="name" (completeMethod)="search($event)" />
-
-                    <small class="text-red-500" *ngIf="submitted && !event.owner">Cliente es requerido.</small>
+                    <p-autocomplete formControlName="owner" (onSelect)="onSelectCustomer($event)" [suggestions]="lCustomers" [dropdown]="true" optionLabel="name" (completeMethod)="search($event)" />
+                    <small class="text-red-500" *ngIf="form.get('owner')?.touched && form.get('owner')?.hasError('required')">Cliente es requerido.</small>
                 </div>
 
                 <div>
                     <label for="nit" class="block font-bold mb-3">Cédula / Nit:</label>
-                    <input type="text" pInputText id="nit" [(ngModel)]="event.nit" disabled required autofocus fluid />
+                    <input type="text" pInputText id="nit" formControlName="nit" required autofocus fluid />
                 </div>
 
                 <div>
                     <label for="description" class="block font-bold mb-3">Tipo de Evento</label>
-                    <input type="text" pInputText id="description" [(ngModel)]="event.description" required autofocus fluid />
-                    <small class="text-red-500" *ngIf="submitted && !event.description">Descripción es requerido.</small>
+                    <input type="text" pInputText id="description" formControlName="description" required autofocus fluid />
+                    <small class="text-red-500" *ngIf="form.get('description')?.touched && form.get('description')?.hasError('required')">Descripción es requerido.</small>
                 </div>
                 <div>
                     <label for="location" class="block font-bold mb-3">Locación</label>
-                    <input type="text" pInputText id="location" [(ngModel)]="event.location" required autofocus fluid />
-                    <small class="text-red-500" *ngIf="submitted && !event.location">Locación es requerida.</small>
+                    <input type="text" pInputText id="location" formControlName="location" required autofocus fluid />
+                    <small class="text-red-500" *ngIf="form.get('location')?.touched && form.get('location')?.hasError('required')">Locación es requerida.</small>
                 </div>
 
                 <div class="grid grid-cols-12 gap-4">
                     <div class="col-span-6">
                         <label for="date" class="block font-bold mb-3">Fecha Evento</label>
-                        <p-datepicker [(ngModel)]="event.date" [iconDisplay]="'input'" [appendTo]="'body'" [showIcon]="true" inputId="icondisplay" id="date" />
+                        <p-datepicker formControlName="date" [iconDisplay]="'input'" [appendTo]="'body'" [showIcon]="true" inputId="icondisplay" id="date" />
                     </div>
                     <div class="col-span-6">
                         <label for="time" class="block font-bold mb-3">Hora Evento</label>
-                        <p-datepicker class="w-full" [(ngModel)]="event.time" [iconDisplay]="'input'" [appendTo]="'body'" [showIcon]="true" id="time" [timeOnly]="true" inputId="templatedisplay">
+                        <p-datepicker hourFormat="12" class="w-full" formControlName="time" [iconDisplay]="'input'" [appendTo]="'body'" [showIcon]="true" id="time" [timeOnly]="true" inputId="templatedisplay">
                             <ng-template #inputicon let-clickCallBack="clickCallBack">
                                 <i class="pi pi-clock" (click)="clickCallBack($event)"></i>
                             </ng-template>
@@ -128,11 +53,11 @@
                     </div>
                 </div>
             </div>
-        </ng-template>
+        </form>
+    </ng-template>
 
-        <ng-template #footer>
-            <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
-            <p-button label="Guardar" icon="pi pi-check" (click)="saveEvent()" />
-        </ng-template>
-    </p-dialog>
-</div>
+    <ng-template #footer>
+        <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
+        <p-button label="Guardar" icon="pi pi-check" (click)="saveEvent()" />
+    </ng-template>
+</p-dialog>

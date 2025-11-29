@@ -11,19 +11,21 @@ import { exportToExcel } from '../../../../shared/utils/export-event';
 import { MaskPipe } from '../../../../shared/pipes/hide-maks';
 import { SelectChangeEvent, SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 @Component({
     selector: 'app-event-detail',
-    imports: [TabsModule, RouterModule, CommonModule, ButtonModule, TooltipModule, MaskPipe, SelectModule, FormsModule, ToastModule],
-    providers: [MessageService],
+    imports: [TabsModule, RouterModule, CommonModule, ConfirmDialogModule, ButtonModule, TooltipModule, MaskPipe, SelectModule, FormsModule, ToastModule],
+    providers: [MessageService, ConfirmationService],
     standalone: true,
     templateUrl: './event-detail.html'
 })
 export class EventDetail implements OnInit {
     activeRoute = inject(ActivatedRoute);
     messageService = inject(MessageService);
+    confirmationService = inject(ConfirmationService);
 
     status: string = 'inQuote';
 
@@ -87,6 +89,29 @@ export class EventDetail implements OnInit {
         this.activeRoute.params.subscribe((params) => {
             const { id } = params;
             this.eventService.eventId$.set(id);
+        });
+    }
+
+    deleteEvent() {
+        console.log('object', this.totalEvent);
+        const self = this;
+        this.confirmationService.confirm({
+            message: 'Se eliminarán todos los datos relacionados al evento, horas, gastos y cotizaciones ¿Está seguro de eliminar el evento: ' + self.totalEvent.description + '?',
+            header: 'Confirmar',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Sí',
+            rejectLabel: 'No',
+            accept: () => {
+                this.eventService.deleteEventById(this.eventService.eventId$()).subscribe(() => {
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Successful',
+                        detail: 'Evento eliminado correctamente',
+                        life: 3000
+                    });
+                    this.router.navigate(['/pages/events']);
+                });
+            }
         });
     }
 

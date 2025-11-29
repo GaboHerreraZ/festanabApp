@@ -7,4 +7,5 @@ export interface Event {
     location?: string;
     date?: Date;
     time?: Date;
+    status: string;
 }

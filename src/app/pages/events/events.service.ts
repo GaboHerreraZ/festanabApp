@@ -6,6 +6,7 @@ import { Bill } from '../../core/models/bill';
 import { IHour } from '../../core/models/hour';
 import { CustomerQuote } from '../../core/models/customer-quote';
 import { Observable } from 'rxjs';
+import { IEmployeeService } from '../../core/models/employee-service';
 
 @Injectable({
     providedIn: 'root'
@@ -125,5 +126,23 @@ export class EventsService {
 
     getCustomerQuote(quoteId: string) {
         return this.apiService.get(`${this.PATH}/get-customer-quote/${quoteId}`);
+    }
+
+    // employee-services
+
+    getEmployeeServiceByEventId(eventId: string) {
+        return this.apiService.get(`${this.PATH}/get-employee-services-by-event-id/${eventId}`);
+    }
+
+    addEmployeeService(employeeService: IEmployeeService) {
+        return this.apiService.post(`${this.PATH}/add-employee-service`, employeeService);
+    }
+
+    editEmployeeService(employeeService: IEmployeeService) {
+        return this.apiService.post(`${this.PATH}/edit-employee-service`, employeeService);
+    }
+
+    deleteEmployeeService(employeId: string) {
+        return this.apiService.delete(`${this.PATH}/delete-employee-service/${employeId}`);
     }
 }

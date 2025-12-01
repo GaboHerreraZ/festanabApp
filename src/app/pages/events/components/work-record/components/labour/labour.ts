@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, OnDestroy, OnInit, Signal, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, OnDestroy, OnInit, Signal, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
@@ -8,14 +8,14 @@ import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
-import { IHour } from '../../../../core/models/hour';
-import { FooterValues, TableSettings } from '../../../../core/models/table-setting';
+import { IHour } from '../../../../../../core/models/hour';
+import { FooterValues, TableSettings } from '../../../../../../core/models/table-setting';
 import { ActivatedRoute } from '@angular/router';
-import { EventsService } from '../../events.service';
-import { Table } from '../../../../shared/components/table/table';
-import { EmployeeService } from '../../../employee/employee.service';
+import { EventsService } from '../../../../events.service';
+import { Table } from '../../../../../../shared/components/table/table';
+import { EmployeeService } from '../../../../../employee/employee.service';
 import { AutoCompleteCompleteEvent, AutoCompleteModule, AutoCompleteSelectEvent } from 'primeng/autocomplete';
-import { IEmployee } from '../../../../core/models/employee';
+import { IEmployee } from '../../../../../../core/models/employee';
 import { BehaviorSubject, filter, map, Subject, switchMap, take, takeLast, takeUntil } from 'rxjs';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { CommonModule } from '@angular/common';
@@ -28,37 +28,35 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
     standalone: true,
     providers: [MessageService, ConfirmationService]
 })
-export class Labour implements OnInit, OnDestroy {
+export class Labour implements OnDestroy {
     refresh$ = new BehaviorSubject<void>(undefined);
 
     activeRoute = inject(ActivatedRoute);
+
     destroy$ = new Subject<void>();
 
     eventService = inject(EventsService);
+
     messageService = inject(MessageService);
 
     employeeService = inject(EmployeeService);
 
     confirmationService = inject(ConfirmationService);
-    detailTitle: string = '';
-    currentDate = new Date();
-    submitted: boolean = false;
-    eventId = signal<any>(null);
-    form!: FormGroup;
 
-    employees = toSignal(
-        this.employeeService.getAllEmployee().pipe(
-            takeUntil(this.destroy$),
-            map((data: any) => data.data)
-        ),
-        { initialValue: [] }
-    );
+    detailTitle: string = '';
+
+    eventId = input<string>();
+
+    employees = input<IEmployee[]>([]);
+
+    form!: FormGroup;
 
     timeDialog: boolean = false;
 
     eventId$ = toObservable(this.eventId);
 
     dateSignal!: Signal<Date | null>;
+
     minDateSignal = computed(() => {
         const date = this.dateSignal();
         if (!date) return null;
@@ -79,7 +77,7 @@ export class Labour implements OnInit, OnDestroy {
         switchMap(() =>
             this.eventId$.pipe(
                 filter((id) => !!id),
-                switchMap((id) => this.eventService.getHoursByEventId(id).pipe(map((data: any) => data.data)))
+                switchMap((id) => this.eventService.getHoursByEventId(id!).pipe(map((data: any) => data.data)))
             )
         )
     );
@@ -375,11 +373,6 @@ export class Labour implements OnInit, OnDestroy {
         });
     }
 
-    ngOnInit(): void {
-        this.loadDetail();
-        this.getAllEmployees();
-    }
-
     ngOnDestroy(): void {
         this.destroy$.next();
         this.destroy$.complete();
@@ -435,7 +428,8 @@ export class Labour implements OnInit, OnDestroy {
         let { _id, ...res } = this.form.getRawValue();
 
         const item: IHour = {
-            ...this.form.getRawValue()
+            ...this.form.getRawValue(),
+            eventId: this.eventId()
         };
 
         const hasHour = this.employeeHasAuxTransportInDate(res.employeeId, res.date, _id);
@@ -444,7 +438,7 @@ export class Labour implements OnInit, OnDestroy {
 
         if (!_id) {
             this.eventService
-                .addNewHour({ ...res, hasHour, auxiliaryTrasport: hasHour ? 0 : res.auxiliaryTrasport })
+                .addNewHour({ ...item, hasHour, auxiliaryTrasport: hasHour ? 0 : res.auxiliaryTrasport })
                 .pipe(takeUntil(this.destroy$))
                 .subscribe({
                     next: () => {
@@ -469,7 +463,7 @@ export class Labour implements OnInit, OnDestroy {
         }
 
         this.eventService
-            .editHour({ ...item, hasHour, auxiliaryTrasport: hasHour ? 0 : item.auxiliaryTrasport })
+            .editHour({ ...item, _id, hasHour, auxiliaryTrasport: hasHour ? 0 : item.auxiliaryTrasport })
             .pipe(takeUntil(this.destroy$))
             .subscribe({
                 next: () => {
@@ -483,20 +477,6 @@ export class Labour implements OnInit, OnDestroy {
 
     search(event: AutoCompleteCompleteEvent) {
         this.employeeSearch = this.employees().filter((item: any) => item.name?.includes(event.query));
-    }
-
-    private loadDetail() {
-        this.activeRoute.parent?.params.subscribe((params) => {
-            this.eventId.set(params['id'] || '');
-            this.form.patchValue({ eventId: this.eventId() });
-        });
-    }
-
-    private getAllEmployees() {
-        this.employeeService.getAllEmployee().pipe(
-            takeUntil(this.destroy$),
-            map((data: any) => data.data)
-        );
     }
 
     private resetForm() {

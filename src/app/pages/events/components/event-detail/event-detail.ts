@@ -66,7 +66,7 @@ export class EventDetail implements OnInit {
     tabs = [
         { route: 'quote', label: 'Cotización', icon: 'pi pi-calculator' },
         { route: 'bills', label: 'Gastos', icon: 'pi pi-receipt' },
-        { route: 'labour', label: 'Registro de Horas', icon: 'pi pi-calendar-clock' },
+        { route: 'work-record', label: 'Registro de Trabajo', icon: 'pi pi-calendar-clock' },
         { route: 'customer-quote', label: 'Historial Cotizaciones Cliente', icon: 'pi receipt' }
     ];
 
@@ -93,7 +93,6 @@ export class EventDetail implements OnInit {
     }
 
     deleteEvent() {
-        console.log('object', this.totalEvent);
         const self = this;
         this.confirmationService.confirm({
             message: 'Se eliminarán todos los datos relacionados al evento, horas, gastos y cotizaciones ¿Está seguro de eliminar el evento: ' + self.totalEvent.description + '?',

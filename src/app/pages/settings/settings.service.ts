@@ -14,8 +14,6 @@ export class SettingService {
 
     apiService = inject(ApiService);
 
-    constructor() {}
-
     getAllModule() {
         return this.apiService.get<IModule[]>(`${this.PATH_UTIL}/module/all`);
     }

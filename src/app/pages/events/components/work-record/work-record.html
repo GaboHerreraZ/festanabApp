@@ -1,0 +1,23 @@
+<div class="my-2 px-4">
+    <p-button label="Liquidar Evento" severity="success" raised (onClick)="settleEvent()" />
+</div>
+
+<p-tabs value="hours" class="overflow-x-auto whitespace-nowrap lg:whitespace-normal mt-4 px-4">
+    <p-tablist class="flex lg:flex-wrap gap-2 min-w-max">
+        @for(tab of tabs; track tab.route){
+        <p-tab [value]="tab.route" class="flex items-center gap-1 px-3 py-2 text-sm whitespace-nowrap">
+            <i [class]="tab.icon"></i>
+            <span>{{ tab.label }}</span>
+        </p-tab>
+        }
+    </p-tablist>
+    <p-tabpanels>
+        <p-tabpanel value="hours">
+            <app-labour [eventId]="eventId()" [employees]="employees()"></app-labour>
+        </p-tabpanel>
+        <p-tabpanel value="employee-services">
+            <app-employee-services [eventId]="eventId()" [employees]="employees()"></app-employee-services>
+        </p-tabpanel>
+        <p-tabpanel value="settlement"> </p-tabpanel>
+    </p-tabpanels>
+</p-tabs>

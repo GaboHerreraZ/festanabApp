@@ -1,0 +1,70 @@
+<div class="card">
+    <div class="font-semibold text-xl mb-4">Registro de Servicios</div>
+    <p-toolbar styleClass="mb-6">
+        <ng-template #start>
+            <p-button label="Registrar Servicio" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew(null)" />
+        </ng-template>
+    </p-toolbar>
+    <app-table [parentId]="''" [tableSettings]="tableSettings" [title]="'Administrar Servicios'" [data]="employeeServices()" />
+</div>
+
+<p-dialog [(visible)]="timeDialog" [style]="{ width: '450px', height:'450px' }" [header]="detailTitle" [modal]="true">
+    <ng-template #content>
+        <div class="flex flex-col gap-6">
+            <form [formGroup]="form">
+                <div class="w-full">
+                    <label for="name" class="block font-bold">Empleado</label>
+                    <div class="flex flex-col w-full">
+                        <p-autocomplete formControlName="employee" (onSelect)="onSelectEmployee($event)" [suggestions]="employeeSearch" [dropdown]="true" optionLabel="name" (completeMethod)="search($event)" />
+                    </div>
+                    <small class="text-red-500" *ngIf="form.get('employee')?.touched &&  form.get('employee')?.hasError('required')">Empleado es requerido.</small>
+                </div>
+
+                <div class="mt-2">
+                    <label for="cc" class="block font-bold">Cédula</label>
+                    <input type="text" formControlName="cc" [disabled]="true" pInputText id="cc" autofocus fluid />
+                </div>
+
+                <div class="mt-2">
+                    <label for="services" class="block font-bold">Servicio</label>
+                    <p-select [options]="services()" name="services" (onChange)="onServiceChange($event)" formControlName="service" [checkmark]="true" optionLabel="service" [showClear]="true" placeholder="Seleccionar Servicio" class="w-full" />
+                    <small class="text-red-500" *ngIf="form.get('service')?.touched &&  form.get('service')?.hasError('required')">Servicio es requerido.</small>
+                </div>
+
+                <div class="mt-2">
+                    <label for="price" class="block font-bold">Precio Servicio</label>
+                    <p-inputnumber id="price" [disabled]="true" formControlName="servicePrice" mode="currency" [minFractionDigits]="0" currency="COP" fluid />
+                </div>
+
+                <div class="mt-2">
+                    <label for="quantity" class="block font-bold">Cantidad</label>
+                    <p-inputnumber id="quantity" formControlName="quantity" min="1" fluid />
+                </div>
+
+                <div class="mt-2">
+                    <label for="total" class="block font-bold">Total</label>
+                    <p-inputnumber id="total" formControlName="total" mode="currency" [minFractionDigits]="0" currency="COP" fluid />
+                </div>
+
+                <div class="mt-2">
+                    <label for="date" class="block font-bold">Fecha</label>
+                    <p-datepicker formControlName="date" [showIcon]="true" [appendTo]="'body'" inputId="buttondisplay" [showOnFocus]="false" />
+                </div>
+
+                <div class="mt-2">
+                    <label for="observations" class="block font-bold mb-3">Observaciones</label>
+                    <textarea class="w-full" rows="4" formControlName="observations" maxlength="100" cols="30" pTextarea></textarea>
+                </div>
+            </form>
+        </div>
+    </ng-template>
+
+    <ng-template #footer>
+        <p-button label="Cancelar" icon="pi pi-times" text (click)="timeDialog = false" />
+        <p-button label="Guardar" icon="pi pi-check" (click)="saveItem()" [disabled]="form.invalid" />
+    </ng-template>
+</p-dialog>
+
+<p-toast />
+
+<p-confirmdialog [style]="{ width: '450px' }" />

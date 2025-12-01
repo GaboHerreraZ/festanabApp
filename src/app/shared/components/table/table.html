@@ -15,17 +15,21 @@
     <ng-template #caption>
         <div class="flex md:flex-row flex-col items-center justify-between">
             <h5 class="m-0">{{title}}</h5>
+            @if(tableSettings.globalFiltes.length){
+
             <p-iconfield>
                 <p-inputicon styleClass="pi pi-search" />
                 <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />
             </p-iconfield>
+            }
         </div>
     </ng-template>
     <ng-template #header>
         <tr>
-            <th style="min-width: 8rem"></th>
+            @if(tableSettings.actions.length){
 
-            @for(header of tableSettings.header; track header.id) {
+            <th style="min-width: 8rem"></th>
+            } @for(header of tableSettings.header; track header.id) {
             <th pSortableColumn="{{header.id}}" [style.minWidth]="header.size">
                 {{ header.title }}
                 <p-sortIcon field="{{header.id}}" />
@@ -35,12 +39,13 @@
     </ng-template>
     <ng-template #body let-item>
         <tr>
+            @if(tableSettings.actions.length){
             <td style="min-width: 12rem">
                 @if(!item['disabled']) { @for(action of tableSettings.actions; track action.id) {
                 <p-button [icon]="action.icon" class="mr-2" [rounded]="true" [outlined]="true" (click)="action.action({sectionId: parentId, item})" />
                 } }
             </td>
-            @for(header of tableSettings.header; track header.id) { @if(!header.pipe && !header.type ) {
+            } @for(header of tableSettings.header; track header.id) { @if(!header.pipe && !header.type ) {
             <td [style.minWidth]="header.size">{{ item[header.id] }}</td>
             } @if(header.pipe === 'price' && !header.type ) {
             <td [style.minWidth]="header.size">{{ item[header.id] | currency: 'COP':'symbol':'1.0-0' }}</td>

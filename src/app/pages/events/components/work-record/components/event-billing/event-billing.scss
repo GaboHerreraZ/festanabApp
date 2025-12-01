@@ -1,0 +1,14 @@
+.billing-content {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 1rem;
+    justify-content: space-between;
+    align-items: flex-start;
+    box-sizing: border-box;
+}
+
+.billing-content > * {
+    flex: 1 1 300px;
+    min-width: 280px;
+}

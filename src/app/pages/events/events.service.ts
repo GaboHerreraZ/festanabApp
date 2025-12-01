@@ -145,4 +145,12 @@ export class EventsService {
     deleteEmployeeService(employeId: string) {
         return this.apiService.delete(`${this.PATH}/delete-employee-service/${employeId}`);
     }
+
+    setEventBilling(eventId: string) {
+        return this.apiService.get(`${this.PATH}/event-billing/${eventId}`);
+    }
+
+    getEventBilling(eventId: string) {
+        return this.apiService.get(`${this.PATH}/get-event-billing/${eventId}`);
+    }
 }

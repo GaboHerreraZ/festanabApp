@@ -1,0 +1,48 @@
+@let lEventBilling = eventBilling().event;
+
+<p-accordion>
+    @for (tab of lEventBilling.billing; track tab._id) {
+    <p-accordion-panel [value]="tab._id">
+        <p-accordion-header>{{ tab.employee }} </p-accordion-header>
+        <p-accordion-content>
+            <div class="billing-content">
+                <div class="mt-2">
+                    <label for="cc" class="block font-bold">Cédula</label>
+                    <input type="text" [value]="tab.cc" [disabled]="true" pInputText id="cc" autofocus fluid />
+                </div>
+
+                <div class="mt-2">
+                    <label for="price" class="block font-bold">Total Horas</label>
+                    <p-inputnumber id="price" [disabled]="true" [(ngModel)]="tab.totalHours" mode="currency" [minFractionDigits]="0" currency="COP" fluid />
+                </div>
+
+                <div class="mt-2">
+                    <label for="price" class="block font-bold">Total Servicios</label>
+                    <p-inputnumber id="price" [disabled]="true" [(ngModel)]="tab.totalServices" mode="currency" [minFractionDigits]="0" currency="COP" fluid />
+                </div>
+
+                <div class="mt-2">
+                    <label for="price" class="block font-bold">Total a Pagar</label>
+                    <p-inputnumber id="price" [disabled]="true" [(ngModel)]="tab.grandTotal" mode="currency" [minFractionDigits]="0" currency="COP" fluid />
+                </div>
+            </div>
+
+            <p-accordion>
+                <p-accordion-panel class="mt-4" [value]="0">
+                    <p-accordion-header class="font-bold">Horas Trabajadas </p-accordion-header>
+                    <p-accordion-content>
+                        <app-table [parentId]="''" [tableSettings]="tableSettingsHours" [title]="'Horas'" [data]="tab.hours" />
+                    </p-accordion-content>
+                </p-accordion-panel>
+
+                <p-accordion-panel class="mt-4" [value]="1">
+                    <p-accordion-header class="font-bold">Servicios Prestados </p-accordion-header>
+                    <p-accordion-content>
+                        <app-table [parentId]="''" [tableSettings]="tableSettingsServices" [title]="'Horas'" [data]="tab.services" />
+                    </p-accordion-content>
+                </p-accordion-panel>
+            </p-accordion>
+        </p-accordion-content>
+    </p-accordion-panel>
+    }
+</p-accordion>

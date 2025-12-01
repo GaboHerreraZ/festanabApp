@@ -18,6 +18,8 @@
         <p-tabpanel value="employee-services">
             <app-employee-services [eventId]="eventId()" [employees]="employees()"></app-employee-services>
         </p-tabpanel>
-        <p-tabpanel value="settlement"> </p-tabpanel>
+        <p-tabpanel value="settlement">
+            <app-event-billing [eventId]="eventId()"></app-event-billing>
+        </p-tabpanel>
     </p-tabpanels>
 </p-tabs>

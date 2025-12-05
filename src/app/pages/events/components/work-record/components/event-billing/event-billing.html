@@ -1,4 +1,4 @@
-@let lEventBilling = eventBilling().event;
+@let lEventBilling = eventBilling()?.event;
 
 <p-accordion>
     @for (tab of lEventBilling?.billing; track tab._id) {

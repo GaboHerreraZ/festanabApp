@@ -2,7 +2,7 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth';
 import { LoadingService } from '../../shared/services/loading.service';
-import { finalize } from 'rxjs';
+import { catchError, finalize, of } from 'rxjs';
 
 export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
     const authService = inject(AuthService);
@@ -19,5 +19,10 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
 
     loadingService.show();
 
-    return next(authReq).pipe(finalize(() => loadingService.hide()));
+    return next(authReq).pipe(
+        catchError((error) => {
+            loadingService.hide();
+            return of(error);
+        }),
+        finalize(() => loadingService.hide()));
 };

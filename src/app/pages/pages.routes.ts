@@ -6,11 +6,9 @@ import { Events } from './events/events';
 import { EventDetail } from './events/components/event-detail/event-detail';
 import { Quote } from './events/components/quote/quote';
 import { Bills } from './events/components/bills/bills';
-import { Labour } from './events/components/work-record/components/labour/labour';
 import { Customer } from './customer/customer';
 import { CustomerQuote } from './events/components/customer-quote/customer-quote';
 import { WorkRecord } from './events/components/work-record/work-record';
-import { EmployeeServices } from './events/components/work-record/components/employee-services/employee-services';
 
 export default [
     { path: 'inventory', component: Inventory },

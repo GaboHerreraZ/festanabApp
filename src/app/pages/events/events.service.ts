@@ -153,4 +153,8 @@ export class EventsService {
     getEventBilling(eventId: string) {
         return this.apiService.get(`${this.PATH}/get-event-billing/${eventId}`);
     }
+
+    getEmployeeBilling(eventId: string, employeeId: string) {
+        return this.apiService.get(`${this.PATH}/get-employee-billing/${eventId}/${employeeId}`);
+    }
 }

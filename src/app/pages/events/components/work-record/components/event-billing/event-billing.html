@@ -1,9 +1,26 @@
 @let lEventBilling = eventBilling().event;
 
 <p-accordion>
-    @for (tab of lEventBilling.billing; track tab._id) {
+    @for (tab of lEventBilling?.billing; track tab._id) {
     <p-accordion-panel [value]="tab._id">
-        <p-accordion-header>{{ tab.employee }} </p-accordion-header>
+        <p-accordion-header>
+            <ng-template #toggleicon let-active="active">
+                @if (active) {
+                <i class="pi pi-minus"></i>
+                } @else {
+                <i class="pi pi-plus"></i>
+                }
+            </ng-template>
+
+            <div class="flex justify-between gap-2 w-full">
+                <span class="font-bold whitespace-nowrap">{{ tab.employee }}</span>
+
+                <div class="flex mr-4">
+                    <p-button icon="pi pi-eye" (click)="seeBilling(tab); $event.stopPropagation()" class="mr-2" pTooltip="Ver Liquidación" tooltipPosition="top" severity="secondary" />
+                    <p-button icon="pi pi-share-alt" (click)="copyBillingLink(tab); $event.stopPropagation()" severity="success" pTooltip="Copiar Link Liquidación" tooltipPosition="top" />
+                </div>
+            </div>
+        </p-accordion-header>
         <p-accordion-content>
             <div class="billing-content">
                 <div class="mt-2">
@@ -46,3 +63,4 @@
     </p-accordion-panel>
     }
 </p-accordion>
+<p-toast />

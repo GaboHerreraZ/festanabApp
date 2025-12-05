@@ -1,40 +1,27 @@
-import { Component, inject, input } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { EventsService } from '../../../../events.service';
-import { BehaviorSubject, filter, map, switchMap } from 'rxjs';
+import { Component, inject } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { map, of, Subject, switchMap, takeUntil } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { EventsService } from '../events/events.service';
 import { CommonModule } from '@angular/common';
-import { AccordionModule } from 'primeng/accordion';
-import { InputTextModule } from 'primeng/inputtext';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { FormsModule } from '@angular/forms';
-import { TableSettings } from '../../../../../../core/models/table-setting';
-import { Table } from '../../../../../../shared/components/table/table';
-import { ButtonModule } from 'primeng/button';
-import { TooltipModule } from 'primeng/tooltip';
-import { Router } from '@angular/router';
-import { Clipboard } from '@angular/cdk/clipboard';
-import { MessageService } from 'primeng/api';
+import { ImageModule } from 'primeng/image';
+import { PanelModule } from 'primeng/panel';
+import { TableSettings } from '../../core/models/table-setting';
+import { Table } from '../../shared/components/table/table';
 import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 @Component({
-    selector: 'app-event-billing',
-    templateUrl: './event-billing.html',
-    styleUrls: ['./event-billing.scss'],
-    providers: [MessageService],
-    standalone: true,
-    imports: [CommonModule, AccordionModule, ToastModule, InputTextModule, InputNumberModule, FormsModule, Table, ButtonModule, TooltipModule]
+    selector: 'app-employee-billing',
+    templateUrl: './employee-billing.html',
+    imports: [CommonModule, ImageModule, PanelModule, Table, ToastModule]
 })
-export class EventBilling {
-    refresh$ = new BehaviorSubject<void>(undefined);
+export class EmployeeBilling {
+    activatedRoute = inject(ActivatedRoute);
 
-    messageService = inject(MessageService);
-
-    eventId = input<string>();
     eventService = inject(EventsService);
 
-    router = inject(Router);
-
-    eventId$ = toObservable(this.eventId);
+    destroy$ = new Subject<void>();
 
     tableSettingsHours: TableSettings = {
         includesTotal: true,
@@ -268,39 +255,40 @@ export class EventBilling {
         actions: []
     };
 
-    eventBilling$ = this.refresh$.pipe(
-        switchMap(() =>
-            this.eventId$.pipe(
-                filter((id) => !!id),
-                switchMap((id) =>
-                    this.eventService.getEventBilling(id!).pipe(
-                        map((data: any) => {
-                            return data.data;
-                        })
-                    )
-                )
+    billingEmploye = toSignal(
+        this.activatedRoute.params.pipe(
+            takeUntil(this.destroy$),
+            map((params) => {
+                return {
+                    employeeId: params['employeeId']!,
+                    eventId: params['eventId']!
+                };
+            }),
+            switchMap(({ eventId, employeeId }) =>
+                !eventId || !employeeId
+                    ? of(null)
+                    : this.eventService.getEmployeeBilling(eventId, employeeId).pipe(
+                          map((res: any) => {
+                              const data = res.data[0];
+                              const { event } = data;
+                              const { billing, ...rest } = event;
+
+                              const employeBilling = {
+                                  ...rest,
+                                  ...billing[0]
+                              };
+
+                              console.log('employeBilling', employeBilling);
+                              return employeBilling;
+                          })
+                      )
             )
-        )
+        ),
+        { initialValue: { employeeId: '', eventId: '' } }
     );
 
-    eventBilling = toSignal(this.eventBilling$, { initialValue: [] });
-
-    constructor(private clipboard: Clipboard) {}
-
-    seeBilling(employee: any) {
-        const url = this.router.serializeUrl(this.router.createUrlTree([`/employee-billing`, this.eventId(), employee._id]));
-        window.open(url, '_blank');
-    }
-
-    copyBillingLink(employee: any) {
-        console.log('object employee', employee);
-        const url = `${window.location.origin}/employee-billing/${this.eventId()}/${employee._id}`;
-        this.clipboard.copy(url);
-        this.messageService.add({
-            severity: 'success',
-            summary: 'OK',
-            detail: 'Comprobante de pago copiado al portapapeles',
-            life: 3000
-        });
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 }

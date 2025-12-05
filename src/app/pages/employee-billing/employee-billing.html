@@ -1,0 +1,72 @@
+<div class="w-full flex justify-center mt-10 px-4">
+    <div class="w-full max-w-4xl space-y-8">
+        @let billingEmployeeData = billingEmploye();
+
+        <!-- CARD PRINCIPAL -->
+        <div class="card flex flex-col md:flex-row items-center md:items-start justify-between w-full gap-6 md:gap-12 p-6 bg-white rounded-xl shadow-md">
+            <img src="assets/images/festanab.png" class="w-40 md:w-60 object-contain order-1 md:order-2" alt="Festanab Logo" />
+
+            <div class="flex-1 text-sm md:text-base order-2 md:order-1">
+                <h2 class="font-bold text-4xl mb-4">Comprobante de Pago</h2>
+
+                <div class="mb-3">
+                    <span class="font-bold text-xl mr-2">Nombre:</span>
+                    <span class="font-medium text-xl">{{ billingEmployeeData.employee }}</span>
+                </div>
+
+                <div class="mb-3">
+                    <span class="font-bold mr-2 text-xl">Cédula</span>
+                    <span class="font-medium text-xl">{{ billingEmployeeData.cc }}</span>
+                </div>
+
+                <div class="mb-3">
+                    <span class="font-bold mr-2 text-xl">Evento:</span>
+                    <span class="font-medium text-xl">{{ billingEmployeeData.owner }}</span>
+                </div>
+
+                <div class="mb-3">
+                    <span class="font-bold mr-2 text-xl">Fecha del Evento:</span>
+                    <span class="font-medium mr-2 text-xl"> {{ billingEmployeeData.date | date: 'd \'de\' MMMM \'de\' y':'es' }} </span>
+                    <span class="font-medium text-xl"> {{ billingEmployeeData.time | date: 'h:mm a' }} </span>
+                </div>
+
+                <div class="mb-3">
+                    <span class="font-bold mr-2 text-xl">Locación:</span>
+                    <span class="font-medium text-xl">{{ billingEmployeeData.location }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- HORAS -->
+        <p-panel header="Horas Trabajadas" [toggleable]="true" class="text-2xl font-bold w-full">
+            <div class="text-base mt-4">
+                <app-table [parentId]="''" [tableSettings]="tableSettingsHours" [title]="'Registro de Horas'" [data]="billingEmployeeData.hours" />
+            </div>
+        </p-panel>
+
+        <!-- SERVICIOS -->
+        @if(billingEmployeeData.services && billingEmployeeData.services.length > 0) {
+        <p-panel header="Servicios Prestados" [toggleable]="true" class="text-2xl font-bold w-full">
+            <div class="text-base mt-4">
+                <app-table [parentId]="''" [tableSettings]="tableSettingsServices" [title]="'Registro de Servicios'" [data]="billingEmployeeData.services" />
+            </div>
+        </p-panel>
+        }
+
+        <!-- TOTAL -->
+        <div class="card mt-8 p-6 text-center bg-white rounded-xl shadow-md">
+            <h2 class="text-2xl mb-2">Total a Pagar</h2>
+            <label class="font-bold text-4xl"> {{ billingEmployeeData.grandTotal | currency: 'COP':'symbol':'1.0-0' }} </label>
+        </div>
+
+        <!-- FIRMA -->
+        <div class="card grid place-items-center bg-white rounded-xl shadow-md p-6">
+            <span class="text-xl font-bold">¡GRACIAS POR TU PARTICIPACIÓN EN EL EQUIPO!</span>
+            <div class="flex flex-col mt-10 items-center">
+                <p-image src="assets/images/firma.png" alt="Firma" width="150" />
+                <span class="text-md font-bold">Nicolas Alvarez</span>
+                <span class="text-sm">Director Creativo</span>
+            </div>
+        </div>
+    </div>
+</div>

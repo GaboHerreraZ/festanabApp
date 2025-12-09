@@ -249,7 +249,8 @@ export class Events {
             .subscribe({
                 next: (response: any) => {
                     const { data } = response;
-                    this.goEventDetail(data);
+                    const newData = { ...data, _id: data.eventId };
+                    this.goEventDetail(newData);
                 },
                 error: () => {
                     this.service.add({ severity: 'error', summary: 'Error', detail: 'No se pudo clonar el evento.' });
@@ -281,7 +282,6 @@ export class Events {
     }
 
     editEvent(event: EventFesta) {
-        console.log('s', event);
         this.eventDialog = true;
         this.form.patchValue({ ...event, date: new Date(event.date!), time: event.time ? new Date(event.time) : undefined });
     }

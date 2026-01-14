@@ -5,7 +5,7 @@ export interface Bill {
     name: string;
     value: number;
     paymentType: 'Efectivo' | 'Transferencia';
-    paymentCompany: 'Bancolombia' | 'Nequi';
+    paymentCompany: 'Bancolombia' | 'Nequi' | 'Banco de Bogotá';
     observations: string;
     conciliation: boolean;
     billType: string;

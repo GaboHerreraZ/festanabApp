@@ -87,6 +87,10 @@ export class Bills implements OnInit {
 
     paymentCompany = [
         {
+            key: 'Banco de Bogotá',
+            value: 'Banco de Bogotá'
+        },
+        {
             key: 'Bancolombia',
             value: 'Bancolombia'
         },

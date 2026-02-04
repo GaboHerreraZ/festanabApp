@@ -189,20 +189,22 @@ export class EmployeeServices implements OnDestroy {
     }
 
     openNew(item: any) {
+        this.resetForm();
         this.detailTitle = 'Nuevo Registro';
 
         this.timeDialog = true;
         if (item) {
             this.detailTitle = 'Editar Registro';
 
-            this.form.patchValue({ ...item, date: new Date(item.date), startTime: new Date(item.startTime), endTime: new Date(item.endTime) });
+            const selectedService = this.services().find((s: any) => s._id === item.serviceId);
+            this.form.patchValue({ ...item, date: new Date(item.date), service: selectedService || item.service });
         }
     }
 
     onServiceChange(event: SelectChangeEvent) {
-        const { _id, service, price } = event.value;
+        const { _id, price } = event.value;
         const { quantity } = this.form.getRawValue();
-        this.form.patchValue({ serviceId: _id, servicePrice: price, total: price * quantity, service });
+        this.form.patchValue({ serviceId: _id, servicePrice: price, total: price * quantity });
     }
 
     onSelectEmployee(employee: AutoCompleteSelectEvent) {
@@ -241,11 +243,11 @@ export class EmployeeServices implements OnDestroy {
     }
 
     saveItem() {
-        let { _id, ...res } = this.form.getRawValue();
-        console.log('event', this.eventId());
+        let { _id, service, ...res } = this.form.getRawValue();
 
         const item: IEmployeeService = {
             ...res,
+            service: typeof service === 'object' ? service.service : service,
             eventId: this.eventId()
         };
 

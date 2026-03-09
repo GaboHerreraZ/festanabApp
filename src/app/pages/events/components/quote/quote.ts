@@ -285,8 +285,8 @@ export class Quote implements OnInit {
         const valuesItemsAiu = {
             admin: this.item.rentalPrice * 0.1,
             unexpected: this.item.rentalPrice * 0.1,
-            management: this.item.rentalPrice * 0.1,
-            accounting: this.item.rentalPrice * 0.05
+            management: this.item.rentalPrice * 0.15,
+            accounting: this.item.rentalPrice * 0.07
         };
 
         const newSection = aiuSection?.items.map((item) => {

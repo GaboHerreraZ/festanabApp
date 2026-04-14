@@ -46,27 +46,36 @@
         <label class="font-bold text-4xl">{{event.totalRentalPrice | currency: 'COP':'symbol':'1.0-0'}}</label>
     </div>
 
-    <div class="card flex md:flex-row flex-col justify-between">
-        <div class="grid md:w-1/2 w-full">
-            <span class="font-bold text-xl">!RESERVA TU EVENTO!</span>
-            <p class="text-lg">con mínimo 10 días de antelación, realizando un abono del <span class="font-bold">30%</span> al <span class="font-bold">50%</span> del costo total.</p>
+    <div class="card border-l-4 border-amber-500 bg-gradient-to-br from-amber-50 to-white shadow-lg rounded-xl p-8">
+        <div class="flex items-center mb-4">
+            <i class="pi pi-calendar-plus text-amber-600 text-3xl mr-3"></i>
+            <h2 class="font-bold text-2xl tracking-wide text-gray-800">Reserva tu servicio</h2>
         </div>
+        <p class="text-lg text-gray-700 leading-relaxed mb-6 italic">
+            Para garantizar la disponibilidad y correcta planificación de tu evento, es necesario confirmar la reserva con un anticipo del <span class="font-bold text-amber-700">30%</span> del valor total.
+        </p>
 
-        <div class="grid md:w-1/2 w-full mt-5 md:mt-0">
-            <span class="font-bold text-xl">ESTE VALOR INCLUYE</span>
-            <div class="flex items-center my-2">
-                <i class="pi font-bold pi-check mr-2"></i>
-                <p class="m-0 text-xl">Desplazamiento de mobiliario.</p>
-            </div>
-            <div class="flex items-center my-2">
-                <i class="pi font-bold pi-check mr-2"></i>
-                <p class="m-0 text-xl">Instalaciónn y desmontaje.</p>
-            </div>
+        <div class="mt-4">
+            <h3 class="font-semibold text-xl text-gray-800 mb-3">Este servicio incluye:</h3>
+            <ul class="space-y-2">
+                <li class="flex items-start">
+                    <i class="pi pi-check-circle text-amber-600 mr-3 mt-1"></i>
+                    <span class="text-lg text-gray-700">Transporte y desplazamiento del mobiliario.</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="pi pi-check-circle text-amber-600 mr-3 mt-1"></i>
+                    <span class="text-lg text-gray-700">Instalación y montaje en el lugar del evento.</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="pi pi-check-circle text-amber-600 mr-3 mt-1"></i>
+                    <span class="text-lg text-gray-700">Desmontaje al finalizar el servicio.</span>
+                </li>
+            </ul>
         </div>
     </div>
 
     <div class="card grid">
-        <span class="text-xl font-bold">!GRACIAS POR CONFIAR EN NUESTRO SERVICIO!</span>
+        <span class="text-xl font-bold">GRACIAS POR CONFIAR EN NUESTRO SERVICIO</span>
         <div class="flex flex-col mt-10">
             <p-image class="block" src="assets/images/firma.png" alt="Festanab" width="150" />
             <span class="text-md font-bold">Nicolas Alvarez</span>

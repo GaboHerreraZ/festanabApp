@@ -28,4 +28,37 @@ export interface IHour {
 
     employeeId: string; // ID del empleado
     hasHour?: boolean;
+    approved?: boolean;
+    approvedAt?: string | Date | null;
+}
+
+export interface IEmployeeHours {
+    _id: string;
+    employeeId: string;
+    employee: string;
+    cc: string;
+    horas: IHour[];
+}
+
+export interface IEmployeeEventHour {
+    _id?: string;
+    startTime: string | Date;
+    endTime: string | Date;
+    approved: boolean;
+    approvedAt?: string | Date | null;
+    observations?: string;
+}
+
+export interface IEmployeeEvent {
+    eventId: string;
+    employeeId: string;
+    employee: string;
+    cc: string;
+    owner: string;
+    description: string;
+    location: string;
+    date: string | Date;
+    status: string;
+    hourPrice?: number;
+    hours: IEmployeeEventHour[];
 }

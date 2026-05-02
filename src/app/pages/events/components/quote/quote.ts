@@ -266,13 +266,11 @@ export class Quote implements OnInit {
     }
 
     getSeverity(item: any) {
-        if (!item) return 'danger';
-        return item ? 'success' : 'danger';
+        return item?.done ? 'success' : 'danger';
     }
 
     getSeverityLabel(item: any) {
-        if (!item) return 'Pendiente';
-        return item ? 'Completado' : 'Pendiente';
+        return item?.done ? 'Completado' : 'Pendiente';
     }
 
     saveUtility() {

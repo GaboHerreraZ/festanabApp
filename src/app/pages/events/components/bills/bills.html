@@ -1,11 +1,13 @@
 <div class="mt-5 card">
     <div class="font-semibold text-xl mb-4">Gastos</div>
+    @if(!eventService.isEventCompleted$()) {
     <p-toolbar styleClass="mb-6">
         <ng-template #start>
             <p-button label="Nuevo Gasto" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew(null)" />
         </ng-template>
     </p-toolbar>
-    <app-table [parentId]="''" [tableSettings]="tableSettings" [footerValues]="footerValues()" [title]="'Administrar Gastos'" [data]="bills()" />
+    }
+    <app-table [parentId]="''" [tableSettings]="tableSettings" [footerValues]="footerValues()" [title]="'Administrar Gastos'" [data]="bills()" [hideActions]="eventService.isEventCompleted$()" />
 </div>
 
 <p-dialog [(visible)]="billDialog" [style]="{ width: '450px' }" header="Detalle del Gasto" [modal]="true">

@@ -16,6 +16,10 @@ export class EventsService {
 
     public eventId$ = signal<string>('');
 
+    public eventStatus$ = signal<string>('');
+
+    public isEventCompleted$ = signal<boolean>(false);
+
     apiService = inject(ApiService);
 
     getAllEvents(status: string) {
@@ -90,6 +94,28 @@ export class EventsService {
 
     deleteHour(hourId: string) {
         return this.apiService.delete(`${this.PATH}/delete-hour/${hourId}`);
+    }
+
+    setHourApproval(hourId: string, approved: boolean, observations?: string) {
+        const payload: { approved: boolean; observations?: string } = { approved };
+        if (!approved && observations) payload.observations = observations;
+        return this.apiService.patch(`${this.PATH}/set-hour-approval/${hourId}`, payload);
+    }
+
+    getEmployeeEventsByCc(cc: string) {
+        return this.apiService.get(`${this.PATH}/get-employee-events-by-cc/${cc}`);
+    }
+
+    getEventEmployees(eventId: string) {
+        return this.apiService.get(`${this.PATH}/get-event-employees/${eventId}`);
+    }
+
+    addEventEmployee(eventId: string, employeeId: string) {
+        return this.apiService.post(`${this.PATH}/add-event-employee`, { eventId, employeeId });
+    }
+
+    deleteEventEmployee(id: string) {
+        return this.apiService.delete(`${this.PATH}/delete-event-employee/${id}`);
     }
 
     editSectionDescription(eventId: string, sectionId: string, description: string) {

@@ -1,11 +1,13 @@
 <div class="card">
     <div class="font-semibold text-xl mb-4">Registro de Servicios</div>
+    @if(!eventService.isEventCompleted$()) {
     <p-toolbar styleClass="mb-6">
         <ng-template #start>
             <p-button label="Registrar Servicio" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew(null)" />
         </ng-template>
     </p-toolbar>
-    <app-table [parentId]="''" [tableSettings]="tableSettings" [title]="'Administrar Servicios'" [data]="employeeServices()" />
+    }
+    <app-table [parentId]="''" [tableSettings]="tableSettings" [title]="'Administrar Servicios'" [data]="employeeServices()" [hideActions]="eventService.isEventCompleted$()" />
 </div>
 
 <p-dialog [(visible)]="timeDialog" [style]="{ width: '450px', height:'450px' }" [header]="detailTitle" [modal]="true">

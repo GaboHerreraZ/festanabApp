@@ -1,1 +1,193 @@
-Festanab Dashboard
+<div class="card mb-4">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h2 class="text-2xl font-semibold m-0">Dashboard</h2>
+            <span class="text-muted-color" *ngIf="monthLabel()">{{ monthLabel() }} {{ selectedYear }}</span>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2 sm:items-end">
+            <div class="flex flex-col">
+                <label class="text-sm text-muted-color mb-1">Año</label>
+                <p-select [options]="yearOptions" [(ngModel)]="selectedYear" optionLabel="label" optionValue="value" placeholder="Año" styleClass="w-full sm:w-32" />
+            </div>
+            <div class="flex flex-col">
+                <label class="text-sm text-muted-color mb-1">Mes</label>
+                <p-select [options]="monthOptions" [(ngModel)]="selectedMonth" optionLabel="label" optionValue="value" placeholder="Mes" styleClass="w-full sm:w-40" />
+            </div>
+            <p-button label="Consultar" icon="pi pi-search" (onClick)="loadDashboard()" />
+        </div>
+    </div>
+</div>
+
+<ng-container *ngIf="loadingCards(); else cardsContent">
+    <div class="grid grid-cols-12 gap-4 mb-4">
+        <div class="col-span-12 lg:col-span-6 xl:col-span-3" *ngFor="let i of [1,2,3,4]">
+            <div class="card mb-0">
+                <div class="flex justify-between mb-4">
+                    <div class="flex-1">
+                        <p-skeleton width="60%" height="1rem" styleClass="mb-2" />
+                        <p-skeleton width="40%" height="1.5rem" />
+                    </div>
+                    <p-skeleton shape="circle" size="2.5rem" />
+                </div>
+                <p-skeleton width="80%" height="0.875rem" />
+            </div>
+        </div>
+        <div class="col-span-12 lg:col-span-6 xl:col-span-4" *ngFor="let i of [1,2,3]">
+            <div class="card mb-0">
+                <div class="flex justify-between">
+                    <div class="flex-1">
+                        <p-skeleton width="50%" height="1rem" styleClass="mb-2" />
+                        <p-skeleton width="70%" height="1.5rem" />
+                    </div>
+                    <p-skeleton shape="circle" size="2.5rem" />
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-container>
+
+<ng-template #cardsContent>
+    <div class="grid grid-cols-12 gap-4 mb-4" *ngIf="cards() as c">
+        <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+            <div class="card mb-0">
+                <div class="flex justify-between mb-4">
+                    <div>
+                        <span class="block text-muted-color font-medium mb-2">Total eventos</span>
+                        <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{ c.totalEvents }}</div>
+                    </div>
+                    <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
+                        <i class="pi pi-calendar text-blue-500 !text-xl"></i>
+                    </div>
+                </div>
+                <span class="text-muted-color text-sm">En cotización: </span>
+                <span class="text-primary font-medium">{{ c.eventsInQuote }}</span>
+            </div>
+        </div>
+
+        <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+            <div class="card mb-0">
+                <div class="flex justify-between mb-4">
+                    <div>
+                        <span class="block text-muted-color font-medium mb-2">Aprobados</span>
+                        <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{ c.eventsApproved }}</div>
+                    </div>
+                    <div class="flex items-center justify-center bg-cyan-100 dark:bg-cyan-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
+                        <i class="pi pi-check-circle text-cyan-500 !text-xl"></i>
+                    </div>
+                </div>
+                <span class="text-muted-color text-sm">Pendientes: </span>
+                <span class="text-primary font-medium">{{ c.eventsPending }}</span>
+            </div>
+        </div>
+
+        <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+            <div class="card mb-0">
+                <div class="flex justify-between mb-4">
+                    <div>
+                        <span class="block text-muted-color font-medium mb-2">Finalizados</span>
+                        <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{ c.eventsCompleted }}</div>
+                    </div>
+                    <div class="flex items-center justify-center bg-green-100 dark:bg-green-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
+                        <i class="pi pi-flag text-green-500 !text-xl"></i>
+                    </div>
+                </div>
+                <span class="text-muted-color text-sm">Horas trabajadas: </span>
+                <span class="text-primary font-medium">{{ c.totalHoursWorked }}</span>
+            </div>
+        </div>
+
+        <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+            <div class="card mb-0">
+                <div class="flex justify-between mb-4">
+                    <div>
+                        <span class="block text-muted-color font-medium mb-2">Costo de horas</span>
+                        <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{ c.totalHourCost | currency: 'COP':'symbol':'1.0-0' }}</div>
+                    </div>
+                    <div class="flex items-center justify-center bg-purple-100 dark:bg-purple-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
+                        <i class="pi pi-clock text-purple-500 !text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-span-12 lg:col-span-6 xl:col-span-4">
+            <div class="card mb-0">
+                <div class="flex justify-between mb-4">
+                    <div>
+                        <span class="block text-muted-color font-medium mb-2">Ingresos</span>
+                        <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{ c.totalRevenue | currency: 'COP':'symbol':'1.0-0' }}</div>
+                    </div>
+                    <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
+                        <i class="pi pi-arrow-up text-blue-500 !text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-span-12 lg:col-span-6 xl:col-span-4">
+            <div class="card mb-0">
+                <div class="flex justify-between mb-4">
+                    <div>
+                        <span class="block text-muted-color font-medium mb-2">Costos</span>
+                        <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{ c.totalCost | currency: 'COP':'symbol':'1.0-0' }}</div>
+                    </div>
+                    <div class="flex items-center justify-center bg-red-100 dark:bg-red-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
+                        <i class="pi pi-arrow-down text-red-500 !text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-span-12 lg:col-span-12 xl:col-span-4">
+            <div class="card mb-0">
+                <div class="flex justify-between mb-4">
+                    <div>
+                        <span class="block text-muted-color font-medium mb-2">Utilidad</span>
+                        <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{ c.totalUtility | currency: 'COP':'symbol':'1.0-0' }}</div>
+                    </div>
+                    <div class="flex items-center justify-center bg-green-100 dark:bg-green-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
+                        <i class="pi pi-dollar text-green-500 !text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<div class="grid grid-cols-12 gap-4">
+    <div class="col-span-12 xl:col-span-6">
+        <div class="card !mb-4">
+            <div class="font-semibold text-xl mb-4">Eventos por mes</div>
+            <div *ngIf="loadingMonthlyEvents(); else monthlyEventsChart" class="h-80 flex items-center justify-center">
+                <p-skeleton width="100%" height="100%" />
+            </div>
+            <ng-template #monthlyEventsChart>
+                <p-chart type="bar" [data]="monthlyEventsData()" [options]="barOptions" class="h-80" />
+            </ng-template>
+        </div>
+    </div>
+
+    <div class="col-span-12 xl:col-span-6">
+        <div class="card !mb-4">
+            <div class="font-semibold text-xl mb-4">Ingresos, costos y utilidad</div>
+            <div *ngIf="loadingMonthlyUtility(); else monthlyUtilityChart" class="h-80 flex items-center justify-center">
+                <p-skeleton width="100%" height="100%" />
+            </div>
+            <ng-template #monthlyUtilityChart>
+                <p-chart type="bar" [data]="monthlyUtilityData()" [options]="mixedOptions" class="h-80" />
+            </ng-template>
+        </div>
+    </div>
+
+    <div class="col-span-12">
+        <div class="card !mb-4">
+            <div class="font-semibold text-xl mb-4">Horas trabajadas</div>
+            <div *ngIf="loadingMonthlyHours(); else monthlyHoursChart" class="h-80 flex items-center justify-center">
+                <p-skeleton width="100%" height="100%" />
+            </div>
+            <ng-template #monthlyHoursChart>
+                <p-chart type="line" [data]="monthlyHoursData()" [options]="lineOptions" class="h-80" />
+            </ng-template>
+        </div>
+    </div>
+</div>

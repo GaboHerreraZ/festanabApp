@@ -1,0 +1,243 @@
+<div class="flex flex-col w-full max-w-7xl mx-auto mt-6 md:mt-10 px-3 md:px-6 lg:px-10 py-3 md:py-4 gap-5 md:gap-6">
+
+    <div class="card relative overflow-hidden w-full">
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-700 via-black to-gray-700"></div>
+
+        <div class="flex items-center gap-3 mb-5">
+            <div class="h-10 w-1 bg-black rounded-full"></div>
+            <h2 class="font-bold text-2xl md:text-3xl text-gray-900 tracking-tight">Registro de Horas</h2>
+        </div>
+
+        <p class="text-sm md:text-base text-gray-600 mb-5">Ingresa tu número de cédula para consultar las horas registradas en tus eventos.</p>
+
+        <div class="flex flex-col sm:flex-row gap-3 w-full">
+            <div class="flex-1 w-full">
+                <label for="cc" class="block font-bold text-gray-800 mb-2">Cédula</label>
+                <input
+                    id="cc"
+                    type="text"
+                    pInputText
+                    inputmode="numeric"
+                    [ngModel]="cc()"
+                    (ngModelChange)="cc.set($event)"
+                    (keyup.enter)="search()"
+                    placeholder="Ej: 1234567890"
+                    class="w-full"
+                    fluid
+                />
+            </div>
+            <div class="flex sm:items-end">
+                <p-button
+                    label="Buscar"
+                    icon="pi pi-search"
+                    class="w-full sm:w-auto"
+                    [loading]="loading()"
+                    (onClick)="search()"
+                />
+            </div>
+        </div>
+    </div>
+
+    @if (searched() && !loading()) {
+        @if (events().length) {
+            <div class="card w-full">
+                <div class="flex items-center gap-3 mb-5">
+                    <i class="pi pi-calendar text-black text-4xl"></i>
+                    <div>
+                        <h3 class="font-bold text-xl md:text-2xl mb-0 text-gray-900">Mis Eventos</h3>
+                        @if (employeeName()) {
+                        <p class="text-sm text-gray-500">{{ employeeName() }}</p>
+                        }
+                    </div>
+                </div>
+
+                <p-accordion>
+                    @for (ev of events(); track ev.eventId) {
+                    <p-accordion-panel [value]="ev.eventId">
+                        <p-accordion-header>
+                            <ng-template #toggleicon let-active="active">
+                                @if (active) {
+                                <i class="pi pi-minus"></i>
+                                } @else {
+                                <i class="pi pi-plus"></i>
+                                }
+                            </ng-template>
+
+                            <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3 w-full">
+                                <div class="flex flex-col text-left min-w-0">
+                                    <span class="font-bold text-gray-900 truncate">{{ ev.description }}</span>
+                                    <span class="text-xs text-gray-500 truncate">{{ ev.date | date: 'd \'de\' MMMM \'de\' y':'es' }} · {{ ev.location }}</span>
+                                </div>
+
+                                <div class="flex flex-wrap items-center justify-start md:justify-end gap-2 md:gap-3 md:mr-4">
+                                    <div class="flex items-center gap-1 whitespace-nowrap">
+                                        <span class="text-xs uppercase text-gray-500">Total Horas:</span>
+                                        <span class="font-semibold text-gray-900">{{ eventTotalHours(ev) | number: '1.0-2' }}</span>
+                                    </div>
+                                    <p-button
+                                        icon="pi pi-plus"
+                                        label="Agregar Horas"
+                                        severity="secondary"
+                                        size="small"
+                                        (click)="openNew(ev); $event.stopPropagation()"
+                                    />
+                                </div>
+                            </div>
+                        </p-accordion-header>
+                        <p-accordion-content>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 text-sm md:text-base">
+                                <div>
+                                    <span class="font-semibold text-gray-700">Cliente:</span>
+                                    <span class="ml-1 text-gray-900">{{ ev.owner }}</span>
+                                </div>
+                                <div>
+                                    <span class="font-semibold text-gray-700">Ubicación:</span>
+                                    <span class="ml-1 text-gray-900">{{ ev.location }}</span>
+                                </div>
+                            </div>
+
+                            <div class="overflow-x-auto -mx-2 sm:mx-0">
+                                <p-table [value]="ev.hours" [tableStyle]="{ 'min-width': '40rem' }" responsiveLayout="scroll">
+                                    <ng-template #header>
+                                        <tr>
+                                            <th>Fecha</th>
+                                            <th>Hora Inicio</th>
+                                            <th>Hora Fin</th>
+                                            <th>Horas</th>
+                                            <th>Estado</th>
+                                            <th>Observaciones</th>
+                                            <th></th>
+                                        </tr>
+                                    </ng-template>
+                                    <ng-template #body let-h>
+                                        <tr>
+                                            <td>{{ h.startTime | date: 'd MMM y':'es' }}</td>
+                                            <td>{{ h.startTime | date: 'h:mm a' }}</td>
+                                            <td>{{ h.endTime | date: 'h:mm a' }}</td>
+                                            <td>{{ diffHours(h.startTime, h.endTime) | number: '1.0-2' }}</td>
+                                            <td>
+                                                <p-tag [value]="getHourLabel(h)" [severity]="getHourSeverity(h)" />
+                                            </td>
+                                            <td class="text-sm text-gray-700">{{ h.observations || '—' }}</td>
+                                            <td>
+                                                <div class="flex items-center gap-2">
+                                                    @if (canEdit(h)) {
+                                                    <p-button
+                                                        icon="pi pi-pencil"
+                                                        severity="secondary"
+                                                        [rounded]="true"
+                                                        [outlined]="true"
+                                                        pTooltip="Editar horas"
+                                                        tooltipPosition="top"
+                                                        (click)="openEdit(ev, h)"
+                                                    />
+                                                    }
+                                                    @if (canDelete(h)) {
+                                                    <p-button
+                                                        icon="pi pi-trash"
+                                                        severity="danger"
+                                                        [rounded]="true"
+                                                        [outlined]="true"
+                                                        pTooltip="Eliminar"
+                                                        tooltipPosition="top"
+                                                        (click)="deleteHour(h)"
+                                                    />
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </ng-template>
+                                    <ng-template #emptymessage>
+                                        <tr>
+                                            <td colspan="7" class="text-center text-gray-500 py-4">No hay horas registradas en este evento.</td>
+                                        </tr>
+                                    </ng-template>
+                                </p-table>
+                            </div>
+                        </p-accordion-content>
+                    </p-accordion-panel>
+                    }
+                </p-accordion>
+            </div>
+        } @else {
+            <div class="relative overflow-hidden rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 via-sky-50 to-white shadow-sm p-8">
+                <div class="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-blue-200/40 blur-2xl"></div>
+                <div class="absolute -bottom-16 -left-10 w-48 h-48 rounded-full bg-sky-200/40 blur-2xl"></div>
+
+                <div class="relative flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
+                    <div class="flex items-center justify-center w-14 h-14 rounded-full bg-blue-100 border border-blue-200 shrink-0">
+                        <i class="pi pi-info-circle text-blue-600 text-2xl"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <h3 class="font-semibold text-lg text-blue-900">Sin eventos</h3>
+                        <p class="text-blue-800/80 mt-1">No se encontraron eventos asociados a esta cédula.</p>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<p-dialog [(visible)]="hourDialog" [style]="{ width: '90vw', maxWidth: '480px' }" [breakpoints]="{ '640px': '95vw' }" [header]="dialogTitle" [modal]="true" (onHide)="closeDialog()">
+    <ng-template #content>
+        <form [formGroup]="form" class="flex flex-col gap-4">
+            <div>
+                <label for="date" class="block font-bold mb-2">Fecha</label>
+                <p-datepicker formControlName="date" [showIcon]="true" [appendTo]="'body'" inputId="date" [showOnFocus]="false" [maxDate]="today" />
+            </div>
+
+            <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-6">
+                    <label for="startTime" class="block font-bold mb-2">Hora Inicio</label>
+                    <p-datepicker
+                        class="w-full"
+                        formControlName="startTime"
+                        [appendTo]="'body'"
+                        hourFormat="12"
+                        [iconDisplay]="'input'"
+                        [showIcon]="true"
+                        [minDate]="minDateSignal()"
+                        [maxDate]="maxDateSignal()"
+                        [timeOnly]="true"
+                        [baseZIndex]="1000"
+                        inputId="startTime"
+                    >
+                        <ng-template #inputicon let-clickCallBack="clickCallBack">
+                            <i class="pi pi-clock" (click)="clickCallBack($event)"></i>
+                        </ng-template>
+                    </p-datepicker>
+                    <small class="text-red-500" *ngIf="form.get('startTime')?.touched && form.get('startTime')?.hasError('required')">Hora de Inicio requerida.</small>
+                </div>
+
+                <div class="col-span-6">
+                    <label for="endTime" class="block font-bold mb-2">Hora Fin</label>
+                    <p-datepicker
+                        class="w-full"
+                        formControlName="endTime"
+                        [appendTo]="'body'"
+                        hourFormat="12"
+                        [iconDisplay]="'input'"
+                        [showIcon]="true"
+                        [minDate]="minDateSignal()"
+                        [maxDate]="maxDateSignal()"
+                        [timeOnly]="true"
+                        inputId="endTime"
+                    >
+                        <ng-template #inputicon let-clickCallBack="clickCallBack">
+                            <i class="pi pi-clock" (click)="clickCallBack($event)"></i>
+                        </ng-template>
+                    </p-datepicker>
+                    <small class="text-red-500" *ngIf="form?.errors?.['startAfterEnd'] && form?.touched">Hora Fin debe ser mayor a la hora de inicio.</small>
+                </div>
+            </div>
+        </form>
+    </ng-template>
+
+    <ng-template #footer>
+        <p-button label="Cancelar" icon="pi pi-times" text (click)="closeDialog()" />
+        <p-button label="Guardar" icon="pi pi-check" (click)="save()" [disabled]="form.invalid" />
+    </ng-template>
+</p-dialog>
+
+<p-toast />
+<p-confirmdialog [style]="{ width: '450px' }" />

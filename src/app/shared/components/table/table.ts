@@ -10,12 +10,13 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { FormsModule } from '@angular/forms';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { TagModule } from 'primeng/tag';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
     selector: 'app-table',
     templateUrl: './table.html',
     standalone: true,
-    imports: [CommonModule, TableModule, ButtonModule, TagModule, RadioButtonModule, FormsModule, IconFieldModule, InputIconModule, InputTextModule, CheckboxModule]
+    imports: [CommonModule, TableModule, ButtonModule, TagModule, RadioButtonModule, FormsModule, IconFieldModule, InputIconModule, InputTextModule, CheckboxModule, TooltipModule]
 })
 export class Table {
     @Input() data: any[] = [];
@@ -27,6 +28,10 @@ export class Table {
     @Input() tableSettings!: TableSettings;
 
     @Input() footerValues?: FooterValues;
+
+    @Input() hideActions: boolean = false;
+
+
 
     onGlobalFilter(table: TablePrime, event: Event) {
         table.filterGlobal((event.target as HTMLInputElement).value, 'contains');

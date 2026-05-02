@@ -1,0 +1,49 @@
+<div class="card">
+    <div class="font-semibold text-xl mb-4">Asignación de Personal</div>
+
+    @if (!isApproved()) {
+    <div class="relative overflow-hidden rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 via-sky-50 to-white shadow-sm p-8">
+        <div class="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-blue-200/40 blur-2xl"></div>
+        <div class="absolute -bottom-16 -left-10 w-48 h-48 rounded-full bg-sky-200/40 blur-2xl"></div>
+
+        <div class="relative flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
+            <div class="flex items-center justify-center w-14 h-14 rounded-full bg-blue-100 border border-blue-200 shrink-0">
+                <i class="pi pi-info-circle text-blue-600 text-2xl"></i>
+            </div>
+            <div class="flex flex-col">
+                <h3 class="font-semibold text-lg text-blue-900">Sección no disponible</h3>
+                <p class="text-blue-800/80 mt-1">Esta sección estará habilitada cuando la cotización haya sido aprobada por el cliente.</p>
+            </div>
+        </div>
+    </div>
+    } @else {
+    <p-toolbar styleClass="mb-6">
+        <ng-template #start>
+            <div class="flex flex-col sm:flex-row gap-3 w-full">
+                <p-autocomplete
+                    [(ngModel)]="selectedEmployee"
+                    [suggestions]="employeeSearch"
+                    [dropdown]="true"
+                    optionLabel="name"
+                    placeholder="Seleccionar empleado"
+                    (completeMethod)="search($event)"
+                    (onSelect)="onSelect($event)"
+                    class="w-full sm:w-80"
+                />
+                <p-button
+                    label="Asignar"
+                    icon="pi pi-user-plus"
+                    severity="primary"
+                    [disabled]="!selectedEmployee"
+                    (onClick)="assign()"
+                />
+            </div>
+        </ng-template>
+    </p-toolbar>
+
+    <app-table [parentId]="''" [tableSettings]="tableSettings" [title]="'Personal Asignado'" [data]="eventEmployees()" />
+    }
+</div>
+
+<p-toast />
+<p-confirmdialog [style]="{ width: '450px' }" />

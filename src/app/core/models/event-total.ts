@@ -1,14 +1,21 @@
-export interface EventTotal {
+export type EventStatus = 'inQuote' | 'pending' | 'completed';
+
+export interface IEventTotal {
     _id: string;
-    date: Date;
-    description: string;
-    name: string;
+    customerId?: string;
     owner: string;
-    phoneNumber: number;
+    description: string;
+    nit?: string;
+    location?: string;
+    date: Date;
     time: Date;
-    totalBillValue: number; // Total value of all bills
-    totalCostPrice: number; // Total cost price of all items
-    totalHourCost: number; // Total cost of hours worked
-    totalRentalPrice: number; // Total rental price of items,
-    status: string;
+    status: EventStatus | string;
+    totalRentalPrice: number;
+    totalCostPrice: number;
+    totalBillValue: number;
+    totalHourCost: number;
+    name?: string;
+    phoneNumber?: number;
 }
+
+export type EventTotal = IEventTotal;

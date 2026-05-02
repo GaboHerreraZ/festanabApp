@@ -26,7 +26,7 @@
     </ng-template>
     <ng-template #header>
         <tr>
-            @if(tableSettings.actions.length){
+            @if(tableSettings.actions.length && !hideActions){
 
             <th style="min-width: 8rem"></th>
             } @for(header of tableSettings.header; track header.id) {
@@ -39,11 +39,24 @@
     </ng-template>
     <ng-template #body let-item>
         <tr>
-            @if(tableSettings.actions.length){
+            @if(tableSettings.actions.length && !hideActions){
             <td style="min-width: 12rem">
-                @if(!item['disabled']) { @for(action of tableSettings.actions; track action.id) {
-                <p-button [icon]="action.icon" class="mr-2" [rounded]="true" [outlined]="true" (click)="action.action({sectionId: parentId, item})" />
-                } }
+                @if(!item['disabled']) {
+                    @for(action of tableSettings.actions; track action.id) {
+                        @if(!action.hide || !action.hide(item)) {
+                            <p-button
+                                [icon]="action.icon"
+                                class="mr-2"
+                                [rounded]="true"
+                                [outlined]="true"
+                                [severity]="action.severity || null"
+                                [pTooltip]="action.tooltip || ''"
+                                tooltipPosition="top"
+                                (click)="action.action({sectionId: parentId, item})"
+                            />
+                        }
+                    }
+                }
             </td>
             } @for(header of tableSettings.header; track header.id) { @if(!header.pipe && !header.type ) {
             <td [style.minWidth]="header.size">{{ item[header.id] }}</td>
@@ -60,8 +73,8 @@
             } @if(header.pipe === 'time' && !header.type ) {
             <td [style.minWidth]="header.size">{{ item[header.id] | date:'h:mm a' }}</td>
             } @if(!header.pipe && header.type ==='tag' ) {
-            <td>
-                <p-tag [value]="getSeverityLabel(item[header.id])" [severity]="getSeverity(item[header.id] )" />
+            <td [style.minWidth]="header.size">
+                <p-tag [value]="getSeverityLabel(item)" [severity]="getSeverity(item)" />
             </td>
             } }
 
@@ -73,7 +86,7 @@
     @if(tableSettings.includesTotal && footerValues) {
     <ng-template #footer>
         <tr>
-            <td [attr.colspan]="footerValues.size" class="text-right font-bold p-3 pb-0">Total</td>
+            <td [attr.colspan]="(hideActions && tableSettings.actions.length) ? (+footerValues.size - 1) : footerValues.size" class="text-right font-bold p-3 pb-0">Total</td>
             @for(row of footerValues.values; track row.id) {
             <td class="font-bold p-3 pb-0">{{ row.id.includes('empty') ? '': row.pipe === 'number' ? row.value : row.value | currency: 'COP':'symbol':'1.0-0' }}</td>
             }

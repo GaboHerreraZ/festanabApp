@@ -58,6 +58,10 @@ export class Events {
             key: 'inQuote',
             value: 'En Cotización'
         },
+         {
+            key: 'approved',
+            value: 'Cotización Aprobada'
+        },
         {
             key: 'pending',
             value: 'Por Liquidar'
@@ -112,7 +116,8 @@ export class Events {
     statusLabels: { [key: string]: string } = {
         pending: 'Por Liquidar',
         completed: 'Finalizado',
-        inQuote: 'En Cotización'
+        inQuote: 'En Cotización',
+        approved:'Cotización Aprobada'
     };
 
     form!: FormGroup;
@@ -198,8 +203,8 @@ export class Events {
             }
         ],
         events: {
-            getSeverity: (rowData: any) => (rowData && this.getSeverity(rowData)) || 'info',
-            getSeverityLabel: (rowData: any) => this.statusLabels[rowData] || 'En Cotización'
+            getSeverity: (rowData: any) => (rowData?.status && this.getSeverity(rowData.status)) || 'info',
+            getSeverityLabel: (rowData: any) => this.statusLabels[rowData?.status] || 'En Cotización'
         }
     };
 
@@ -318,6 +323,9 @@ export class Events {
                 return 'danger';
 
             case 'completed':
+                return 'success';
+
+             case 'approved':
                 return 'success';
 
             case 'inQuote':

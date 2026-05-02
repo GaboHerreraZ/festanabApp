@@ -2,7 +2,7 @@ import { Component, effect, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { TabsModule } from 'primeng/tabs';
 import { EventsService } from '../../events.service';
-import { EventTotal } from '../../../../core/models/event-total';
+import { IEventTotal } from '../../../../core/models/event-total';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { Clipboard } from '@angular/cdk/clipboard';
@@ -35,6 +35,10 @@ export class EventDetail implements OnInit {
             value: 'En Cotización'
         },
         {
+            key: 'approved',
+            value: 'Cotización Aprobada'
+        },
+        {
             key: 'pending',
             value: 'Por Liquidar'
         },
@@ -48,7 +52,7 @@ export class EventDetail implements OnInit {
 
     router = inject(Router);
 
-    totalEvent: EventTotal = {
+    totalEvent: IEventTotal = {
         _id: '',
         date: new Date(),
         description: '',
@@ -62,6 +66,10 @@ export class EventDetail implements OnInit {
         totalRentalPrice: 0,
         status: ''
     };
+
+    get isCompleted(): boolean {
+        return this.totalEvent.status === 'completed';
+    }
 
     tabs = [
         { route: 'quote', label: 'Cotización', icon: 'pi pi-calculator' },
@@ -137,6 +145,9 @@ export class EventDetail implements OnInit {
 
     updateStatus(status: SelectChangeEvent) {
         this.eventService.updateEventStatusById(this.eventService.eventId$(), status.value).subscribe(() => {
+            this.totalEvent.status = status.value;
+            this.eventService.eventStatus$.set(status.value);
+            this.eventService.isEventCompleted$.set(status.value === 'completed');
             this.messageService.add({
                 severity: 'success',
                 summary: 'Successful',
@@ -154,6 +165,8 @@ export class EventDetail implements OnInit {
         return this.eventService.getTotalsByEventId(id).subscribe((totals: any) => {
             this.totalEvent = totals.data;
             this.totalEvent.status = this.totalEvent.status || 'inQuote';
+            this.eventService.eventStatus$.set(this.totalEvent.status);
+            this.eventService.isEventCompleted$.set(this.totalEvent.status === 'completed');
             this.utility.set(this.totalEvent.totalRentalPrice - this.totalEvent.totalHourCost - this.totalEvent.totalBillValue);
         });
     }

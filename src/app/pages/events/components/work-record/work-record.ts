@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { TabsModule } from 'primeng/tabs';
 import { Labour } from './components/labour/labour';
 import { EmployeeServices } from './components/employee-services/employee-services';
+import { EventStaff } from './components/event-staff/event-staff';
 import { EmployeeService } from '../../../employee/employee.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, Subject, takeUntil } from 'rxjs';
@@ -16,11 +17,12 @@ import { ToastModule } from 'primeng/toast';
 @Component({
     selector: 'app-work-record',
     templateUrl: './work-record.html',
-    imports: [TabsModule, RouterModule, CommonModule, Labour, EventBilling, EmployeeServices, ButtonModule, ToastModule],
+    imports: [TabsModule, RouterModule, CommonModule, Labour, EventBilling, EmployeeServices, EventStaff, ButtonModule, ToastModule],
     providers: [MessageService]
 })
 export class WorkRecord implements OnDestroy {
     tabs = [
+        { route: 'staff', label: 'Personal Asignado', icon: 'pi pi-users' },
         { route: 'hours', label: 'Registro de Horas', icon: 'pi pi-calendar-clock' },
         { route: 'employee-services', label: 'Registro de Servicios', icon: 'pi pi-receipt' },
         { route: 'settlement', label: 'Liquidación', icon: 'pi pi-calculator' }

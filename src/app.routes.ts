@@ -6,6 +6,7 @@ import { Notfound } from './app/pages/notfound/notfound';
 import { AuthGuard } from './app/core/guard/auth.guard';
 import { CustomerQuotation } from './app/pages/customer-quotation/customer-quotation';
 import { EmployeeBilling } from './app/pages/employee-billing/employee-billing';
+import { EmployeeHoursRecord } from './app/pages/employee-hours-record/employee-hours-record';
 
 export const appRoutes: Routes = [
     {
@@ -21,6 +22,7 @@ export const appRoutes: Routes = [
         ]
     },
     { path: 'customer-quotation/:id', component: CustomerQuotation },
+    { path: 'employee-hours-record', component: EmployeeHoursRecord },
     {
         path: 'employee-billing/:eventId/:employeeId',
         component: EmployeeBilling

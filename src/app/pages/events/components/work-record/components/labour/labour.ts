@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input, OnDestroy, OnInit, Signal, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, OnDestroy, Signal, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
@@ -8,22 +8,39 @@ import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
-import { IHour } from '../../../../../../core/models/hour';
-import { FooterValues, TableSettings } from '../../../../../../core/models/table-setting';
+import { AccordionModule } from 'primeng/accordion';
+import { IEmployeeHours, IHour } from '../../../../../../core/models/hour';
 import { ActivatedRoute } from '@angular/router';
 import { EventsService } from '../../../../events.service';
-import { Table } from '../../../../../../shared/components/table/table';
 import { EmployeeService } from '../../../../../employee/employee.service';
-import { AutoCompleteCompleteEvent, AutoCompleteModule, AutoCompleteSelectEvent } from 'primeng/autocomplete';
+import { AutoCompleteModule } from 'primeng/autocomplete';
 import { IEmployee } from '../../../../../../core/models/employee';
-import { BehaviorSubject, filter, map, Subject, switchMap, take, takeLast, takeUntil } from 'rxjs';
+import { BehaviorSubject, filter, map, Subject, switchMap, takeUntil } from 'rxjs';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { TextareaModule } from 'primeng/textarea';
 import { CommonModule } from '@angular/common';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { EmployeeHours } from './components/employee-hours/employee-hours';
 
 @Component({
     selector: 'app-labour',
-    imports: [ButtonModule, AutoCompleteModule, FormsModule, Table, CommonModule, DatePickerModule, InputTextModule, DatePickerModule, DialogModule, ToastModule, ConfirmDialogModule, ToolbarModule, InputNumberModule, ReactiveFormsModule],
+    imports: [
+        ButtonModule,
+        AutoCompleteModule,
+        FormsModule,
+        CommonModule,
+        DatePickerModule,
+        InputTextModule,
+        DialogModule,
+        ToastModule,
+        ConfirmDialogModule,
+        ToolbarModule,
+        AccordionModule,
+        InputNumberModule,
+        TextareaModule,
+        ReactiveFormsModule,
+        EmployeeHours
+    ],
     templateUrl: './labour.html',
     standalone: true,
     providers: [MessageService, ConfirmationService]
@@ -53,6 +70,10 @@ export class Labour implements OnDestroy {
 
     timeDialog: boolean = false;
 
+    rejectDialog: boolean = false;
+    rejectObservations: string = '';
+    private rejectTarget: IHour | null = null;
+
     eventId$ = toObservable(this.eventId);
 
     dateSignal!: Signal<Date | null>;
@@ -73,283 +94,20 @@ export class Labour implements OnDestroy {
         return d;
     });
 
-    hoursList$ = this.refresh$.pipe(
+    employeesHours$ = this.refresh$.pipe(
         switchMap(() =>
             this.eventId$.pipe(
                 filter((id) => !!id),
-                switchMap((id) => this.eventService.getHoursByEventId(id!).pipe(map((data: any) => data.data)))
+                switchMap((id) => this.eventService.getHoursByEventId(id!).pipe(map((res: any) => res.data as IEmployeeHours[])))
             )
         )
     );
 
-    hours = toSignal(this.hoursList$, { initialValue: [] });
+    employeesHours = toSignal(this.employeesHours$, { initialValue: [] as IEmployeeHours[] });
 
-    employeeSearch: IEmployee[] = [];
-
-    hasErrorTime: boolean = false;
-
-    footerValues: Signal<FooterValues> = computed(() => {
-        const footer: FooterValues = {} as FooterValues;
-        const totaHrsOrd = this.hours().reduce((acc: any, bill: any) => acc + (bill.hrsOrd || 0), 0);
-        const valTotaHrsOrd = this.hours().reduce((acc: any, bill: any) => acc + (bill.valHrsOrd || 0), 0);
-        const hrsExtDia = this.hours().reduce((acc: any, bill: any) => acc + (bill.hrsExtDia || 0), 0);
-        const valExtDia = this.hours().reduce((acc: any, bill: any) => acc + (bill.valExtDia || 0), 0);
-        const hrsNoc = this.hours().reduce((acc: any, bill: any) => acc + (bill.hrsNoc || 0), 0);
-        const valHrsNoc = this.hours().reduce((acc: any, bill: any) => acc + (bill.valHrsNoc || 0), 0);
-
-        const hrsExtNoc = this.hours().reduce((acc: any, bill: any) => acc + (bill.hrsExtNoc || 0), 0);
-        const valExtNoc = this.hours().reduce((acc: any, bill: any) => acc + (bill.valExtNoc || 0), 0);
-
-        const hrsDomDia = this.hours().reduce((acc: any, bill: any) => acc + (bill.hrsDomDia || 0), 0);
-        const valDomDia = this.hours().reduce((acc: any, bill: any) => acc + (bill.valDomDia || 0), 0);
-
-        const hrsExtDomDia = this.hours().reduce((acc: any, bill: any) => acc + (bill.hrsExtDomDia || 0), 0);
-        const valExtDomDia = this.hours().reduce((acc: any, bill: any) => acc + (bill.valExtDomDia || 0), 0);
-
-        const hrsDomNoc = this.hours().reduce((acc: any, bill: any) => acc + (bill.hrsDomNoc || 0), 0);
-        const valDomNoc = this.hours().reduce((acc: any, bill: any) => acc + (bill.valDomNoc || 0), 0);
-
-        const hrsExtDomNoc = this.hours().reduce((acc: any, bill: any) => acc + (bill.hrsExtDomNoc || 0), 0);
-        const valExtDomNoc = this.hours().reduce((acc: any, bill: any) => acc + (bill.valExtDomNoc || 0), 0);
-
-        const total = this.hours().reduce((acc: any, bill: any) => acc + (bill.total || 0), 0);
-        const auxTotal = this.hours().reduce((acc: any, bill: any) => acc + (bill.auxiliaryTrasport || 0), 0);
-
-        footer.size = '7';
-        footer.values = [
-            { id: 'totaHrsOrd', value: totaHrsOrd, pipe: 'number' },
-            { id: 'valTotaHrsOrd', value: valTotaHrsOrd, pipe: 'price' },
-            { id: 'hrsExtDia', value: hrsExtDia, pipe: 'number' },
-            { id: 'valExtDia', value: valExtDia, pipe: 'price' },
-            { id: 'hrsNoc', value: hrsNoc, pipe: 'number' },
-            { id: 'valHrsNoc', value: valHrsNoc, pipe: 'price' },
-
-            { id: 'hrsExtNoc', value: hrsExtNoc, pipe: 'number' },
-            { id: 'valExtNoc', value: valExtNoc, pipe: 'price' },
-
-            { id: 'hrsDomDia', value: hrsDomDia, pipe: 'number' },
-            { id: 'valDomDia', value: valDomDia, pipe: 'price' },
-
-            { id: 'hrsExtDomDia', value: hrsExtDomDia, pipe: 'number' },
-            { id: 'valExtDomDia', value: valExtDomDia, pipe: 'price' },
-
-            { id: 'hrsDomNoc', value: hrsDomNoc, pipe: 'number' },
-            { id: 'valDomNoc', value: valDomNoc, pipe: 'price' },
-
-            { id: 'hrsExtDomNoc', value: hrsExtDomNoc, pipe: 'number' },
-            { id: 'valExtDomNoc', value: valExtDomNoc, pipe: 'price' },
-            { id: 'auxTotal', value: auxTotal, pipe: 'price' },
-
-            { id: 'total', value: total, pipe: 'price' },
-            { id: 'empty1', value: 0, pipe: 'number' }
-        ];
-        return footer;
+    eventTotal = computed(() => {
+        return this.employeesHours().reduce((acc, emp) => acc + emp.horas.reduce((s, h) => s + (h.total || 0), 0), 0);
     });
-
-    tableSettings: TableSettings = {
-        includesTotal: true,
-        columns: [
-            { field: 'employee', header: 'Empleado' },
-            { field: 'cc', header: 'Cédula' },
-            { field: 'date', header: 'Fecha' },
-            { field: 'startTime', header: 'Hora Inicio' },
-            { field: 'endTime', header: 'Hora Fin' },
-            { field: 'hourPrice', header: 'Precio Hora' },
-
-            { field: 'hrsOrd', header: 'Horas Ordinarias' },
-            { field: 'valHrsOrd', header: 'Valor Horas Ordinarias' },
-
-            { field: 'hrsExtDia', header: 'Horas Extras Diurnas' },
-            { field: 'valExtDia', header: 'Valor Horas Extras Diurnas' },
-
-            { field: 'hrsNoc', header: 'Horas Nocturnas Ordinarias' },
-            { field: 'valHrsNoc', header: 'Valor Hora Nocturna Ordinaria' },
-
-            { field: 'hrsExtNoc', header: 'Horas Extras Nocturnas Ordinarias' },
-            { field: 'valExtNoc', header: 'Valor Horas Extras Nocturnas Ordinarias' },
-
-            { field: 'hrsDomDia', header: 'Horas Diurnas Dominicales' },
-            { field: 'valDomDia', header: 'Valor Horas Diurnas Dominicales' },
-
-            { field: 'hrsExtDomDia', header: 'Horas Extra Diurnas Dominicales' },
-            { field: 'valExtDomDia', header: 'Valor Horas Extra Diurnas Dominicales' },
-
-            { field: 'hrsDomNoc', header: 'Horas Nocturnas Dominicales' },
-            { field: 'valDomNoc', header: 'Valor Horas Nocturnas Dominicales' },
-
-            { field: 'hrsExtDomNoc', header: 'Horas Extras Nocturnas Dominicales' },
-            { field: 'valExtDomNoc', header: 'Valor Horas Extras Nocturnas Dominicales' },
-            { field: 'auxiliaryTrasport', header: 'Auxilio Transporte' },
-            { field: 'total', header: 'Total a Pagar' }
-        ],
-        globalFiltes: ['employee', 'cc'],
-        header: [
-            {
-                pipe: null,
-                id: 'employee',
-                title: 'Empleado',
-                size: '16rem'
-            },
-            {
-                pipe: null,
-                id: 'cc',
-                title: 'Cédula',
-                size: '12rem'
-            },
-            {
-                pipe: 'date',
-                id: 'date',
-                title: 'Fecha',
-                size: '14rem'
-            },
-            {
-                pipe: 'time',
-                id: 'startTime',
-                title: 'Hora Inicio',
-                size: '10rem'
-            },
-            {
-                pipe: 'time',
-                id: 'endTime',
-                title: 'Hora Fin',
-                size: '10rem'
-            },
-            {
-                pipe: 'price',
-                id: 'hourPrice',
-                title: 'Precio Hora',
-                size: '10rem'
-            },
-
-            {
-                pipe: null,
-                id: 'hrsOrd',
-                title: 'Horas Ordinarias',
-                size: '10rem'
-            },
-            {
-                pipe: 'price',
-                id: 'valHrsOrd',
-                title: 'Valor Horas Ordinarias',
-                size: '12rem'
-            },
-
-            {
-                pipe: null,
-                id: 'hrsExtDia',
-                title: 'Horas Extras Diurnas',
-                size: '10rem'
-            },
-            {
-                pipe: 'price',
-                id: 'valExtDia',
-                title: 'Valor Horas Extras Diurnas',
-                size: '12rem'
-            },
-
-            {
-                pipe: null,
-                id: 'hrsNoc',
-                title: 'Horas Nocturnas Ordinarias',
-                size: '10rem'
-            },
-            {
-                pipe: 'price',
-                id: 'valHrsNoc',
-                title: 'Valor Hora Nocturna Ordinaria',
-                size: '12rem'
-            },
-
-            {
-                pipe: null,
-                id: 'hrsExtNoc',
-                title: 'Horas Extras Nocturnas Ordinarias',
-                size: '10rem'
-            },
-            {
-                pipe: 'price',
-                id: 'valExtNoc',
-                title: 'Valor Horas Extras Nocturnas Ordinarias',
-                size: '12rem'
-            },
-
-            {
-                pipe: null,
-                id: 'hrsDomDia',
-                title: 'Horas Diurnas Dominicales',
-                size: '10rem'
-            },
-            {
-                pipe: 'price',
-                id: 'valDomDia',
-                title: 'Valor Horas Diurnas Dominicales',
-                size: '12rem'
-            },
-
-            {
-                pipe: null,
-                id: 'hrsExtDomDia',
-                title: 'Horas Extra Diurnas Dominicales',
-                size: '10rem'
-            },
-            {
-                pipe: 'price',
-                id: 'valExtDomDia',
-                title: 'Valor Horas Extra Diurnas Dominicales',
-                size: '12rem'
-            },
-
-            {
-                pipe: null,
-                id: 'hrsDomNoc',
-                title: 'Horas Nocturnas Dominicales',
-                size: '10rem'
-            },
-            {
-                pipe: 'price',
-                id: 'valDomNoc',
-                title: 'Valor Horas Nocturnas Dominicales',
-                size: '12rem'
-            },
-
-            {
-                pipe: null,
-                id: 'hrsExtDomNoc',
-                title: 'Horas Extras Nocturnas Dominicales',
-                size: '10rem'
-            },
-            {
-                pipe: 'price',
-                id: 'valExtDomNoc',
-                title: 'Valor Horas Extras Nocturnas Dominicales',
-                size: '12rem'
-            },
-            {
-                pipe: 'price',
-                id: 'auxiliaryTrasport',
-                title: 'Auxilio Transporte',
-                size: '12rem'
-            },
-            {
-                pipe: 'price',
-                id: 'total',
-                title: 'Total a Pagar',
-                size: '12rem'
-            }
-        ],
-        actions: [
-            {
-                id: 'edit',
-                icon: 'pi pi-pencil',
-                action: (rowData: any) => this.openNew(rowData.item)
-            },
-            {
-                id: 'delete',
-                icon: 'pi pi-trash',
-                action: (rowData: any) => this.deleteItem(rowData.item)
-            }
-        ]
-    };
 
     constructor(private fb: FormBuilder) {
         this.setForm();
@@ -378,28 +136,107 @@ export class Labour implements OnDestroy {
         this.destroy$.complete();
     }
 
-    openNew(item: any) {
+    employeeTotalHours(emp: IEmployeeHours): number {
+        return emp.horas.reduce((acc, h) => {
+            const ord = h.hrsOrd || 0;
+            const extDia = h.hrsExtDia || 0;
+            const noc = h.hrsNoc || 0;
+            const extNoc = h.hrsExtNoc || 0;
+            const domDia = h.hrsDomDia || 0;
+            const extDomDia = h.hrsExtDomDia || 0;
+            const domNoc = h.hrsDomNoc || 0;
+            const extDomNoc = h.hrsExtDomNoc || 0;
+            return acc + ord + extDia + noc + extNoc + domDia + extDomDia + domNoc + extDomNoc;
+        }, 0);
+    }
+
+    employeeTotalAmount(emp: IEmployeeHours): number {
+        return emp.horas.reduce((acc, h) => acc + (h.total || 0), 0);
+    }
+
+    openNewForEmployee(emp: IEmployeeHours) {
         this.detailTitle = 'Nuevo Registro';
-
         this.timeDialog = true;
-        if (item) {
-            this.detailTitle = 'Editar Registro';
+        this.resetForm();
+        this.form.patchValue({
+            employee: { name: emp.employee, cc: emp.cc },
+            cc: emp.cc,
+            employeeId: emp.employeeId,
+            hourPrice: this.findEmployeeHourPrice(emp.employeeId)
+        });
+        this.form.get('employee')!.disable({ emitEvent: false });
+    }
 
-            this.form.patchValue({ ...item, date: new Date(item.date), startTime: new Date(item.startTime), endTime: new Date(item.endTime) });
+    openEdit(item: IHour, emp: IEmployeeHours) {
+        this.detailTitle = 'Editar Registro';
+        this.timeDialog = true;
+        this.form.patchValue({
+            ...item,
+            employee: { name: emp.employee, cc: emp.cc },
+            date: new Date(item.date),
+            startTime: new Date(item.startTime),
+            endTime: item.endTime ? new Date(item.endTime) : null
+        });
+        this.form.get('employee')!.disable({ emitEvent: false });
+    }
+
+    setHourApproval(item: IHour, approved: boolean) {
+        if (!approved) {
+            this.openRejectDialog(item);
+            return;
         }
+        this.callApproval(item, true);
     }
 
-    onSelectEmployee(employee: AutoCompleteSelectEvent) {
-        const {
-            value: { name, cc, hourPrice, _id }
-        } = employee;
-
-        this.form.patchValue({ cc, employee: name, hourPrice, employeeId: _id });
+    openRejectDialog(item: IHour) {
+        this.rejectTarget = item;
+        this.rejectObservations = '';
+        this.rejectDialog = true;
     }
 
-    deleteItem(item: IHour) {
+    closeRejectDialog() {
+        this.rejectDialog = false;
+        this.rejectTarget = null;
+        this.rejectObservations = '';
+    }
+
+    confirmReject() {
+        if (!this.rejectTarget) return;
+        const target = this.rejectTarget;
+        const observations = this.rejectObservations.trim();
+        this.callApproval(target, false, observations);
+    }
+
+    private callApproval(item: IHour, approved: boolean, observations?: string) {
+        this.eventService
+            .setHourApproval(item._id, approved, observations)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: () => {
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Éxito',
+                        detail: approved ? 'Hora aprobada correctamente' : 'Hora rechazada correctamente',
+                        life: 3000
+                    });
+                    if (!approved) this.closeRejectDialog();
+                    this.refresh$.next();
+                },
+                error: (error: any) => {
+                    const { message } = error?.error?.error || {};
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: message || 'No se pudo actualizar el estado',
+                        life: 3000
+                    });
+                }
+            });
+    }
+
+    deleteItem(item: IHour, emp: IEmployeeHours) {
         this.confirmationService.confirm({
-            message: '¿Está seguro de eliminar el registro de hora ' + item.employee + '?',
+            message: '¿Está seguro de eliminar el registro de hora ' + emp.employee + '?',
             header: 'Confirmar',
             icon: 'pi pi-exclamation-triangle',
             acceptLabel: 'Sí',
@@ -434,8 +271,6 @@ export class Labour implements OnDestroy {
 
         const hasHour = this.employeeHasAuxTransportInDate(res.employeeId, res.date, _id);
 
-        console.log('hasHour', hasHour);
-
         if (!_id) {
             this.eventService
                 .addNewHour({ ...item, hasHour, auxiliaryTrasport: hasHour ? 0 : res.auxiliaryTrasport })
@@ -445,7 +280,6 @@ export class Labour implements OnDestroy {
                         this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Hora guardada correctamente', life: 3000 });
                         this.timeDialog = false;
                         this.resetForm();
-
                         this.refresh$.next();
                     },
                     error: (error: any) => {
@@ -475,14 +309,21 @@ export class Labour implements OnDestroy {
             });
     }
 
-    search(event: AutoCompleteCompleteEvent) {
-        this.employeeSearch = this.employees().filter((item: any) => item.name?.includes(event.query));
+    closeDialog() {
+        this.timeDialog = false;
+        this.form.get('employee')!.enable({ emitEvent: false });
+    }
+
+    private findEmployeeHourPrice(employeeId: string): number {
+        const employee = this.employees().find((e: any) => e._id === employeeId);
+        return (employee as any)?.hourPrice ?? 0;
     }
 
     private resetForm() {
         const todayAt6AM = new Date();
         todayAt6AM.setHours(6, 0, 0, 0);
         this.form.reset({ date: new Date(), startTime: todayAt6AM, endTime: todayAt6AM, eventId: this.eventId() });
+        this.form.get('employee')!.enable({ emitEvent: false });
     }
 
     private setForm() {
@@ -554,9 +395,11 @@ export class Labour implements OnDestroy {
     private employeeHasAuxTransportInDate(employeeId: string, date: string | Date, currentRecordId?: string): boolean {
         const target = new Date(date);
 
-        const matches = this.hours().filter((h: any) => {
+        const allHours: IHour[] = this.employeesHours().flatMap((e) => e.horas);
+
+        const matches = allHours.filter((h: any) => {
             if (h.employeeId !== employeeId) return false;
-            if (h._id === currentRecordId) return false; // <-- NO contar el registro actual
+            if (h._id === currentRecordId) return false;
 
             const d = new Date(h.date);
             const sameDay = d.getDate() === target.getDate() && d.getMonth() === target.getMonth() && d.getFullYear() === target.getFullYear();
@@ -564,7 +407,6 @@ export class Labour implements OnDestroy {
             return sameDay && h.auxiliaryTrasport !== 0;
         });
 
-        // Si existe algún *otro* registro con auxiliaryTransport !== 0, entonces ya tiene
         return matches.length > 0;
     }
 }

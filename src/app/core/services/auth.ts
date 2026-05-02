@@ -6,8 +6,10 @@ import { supabase } from '../lib/supabase.client';
 export class AuthService {
     private _token = signal<string | null>(null);
 
+    readonly sessionReady: Promise<void>;
+
     constructor() {
-        this.restoreSession();
+        this.sessionReady = this.restoreSession();
         this.listenToAuthChanges();
     }
 
@@ -17,7 +19,7 @@ export class AuthService {
         this._token.set(data.session?.access_token ?? null);
     }
 
-    async restoreSession() {
+    async restoreSession(): Promise<void> {
         const { data } = await supabase.auth.getSession();
         this._token.set(data.session?.access_token ?? null);
     }

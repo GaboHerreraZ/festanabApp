@@ -1,15 +1,20 @@
+@if(!eventService.isEventCompleted$()) {
 <div class="font-semibold text-xl mb-4 mt-5">Agregar Seccion</div>
+}
 <p-toast />
 
+@if(!eventService.isEventCompleted$()) {
 <div class="mt-2 flex flex-row gap-4">
     <p-select [options]="sections()" [(ngModel)]="selectedSection" [checkmark]="true" optionLabel="module" [showClear]="true" placeholder="Seleccionar sección" class="w-full md:w-56" />
     <p-button label="Agregar" icon="pi pi-plus" severity="secondary" class="mr-2" [disabled]="!selectedSection" (onClick)="saveSection()" />
 </div>
+}
 
 @for(section of clientSections(); track section._id) {
 
 <div class="mt-5 card">
     <div class="font-semibold text-xl mb-4">{{section.name}}</div>
+    @if(!eventService.isEventCompleted$()) {
     <p-toolbar styleClass="mb-6">
         <ng-template #start>
             <p-button label="Nuevo Item" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew(section._id, null)" />
@@ -19,13 +24,14 @@
             <p-button label="Eliminar" icon="pi pi-trash" severity="danger" class="mr-2" (onClick)="deleteSection(section._id)" />
         </ng-template>
     </p-toolbar>
-    <textarea rows="5" cols="30" class="w-full" pTextarea [(ngModel)]="section.description"></textarea>
-    <app-table [parentId]="section._id" [tableSettings]="tableSettings" [footerValues]="section.footer" [title]="'Administrar'" [data]="section.items" />
+    }
+    <textarea rows="5" cols="30" class="w-full" pTextarea [(ngModel)]="section.description" [readOnly]="eventService.isEventCompleted$()"></textarea>
+    <app-table [parentId]="section._id" [tableSettings]="tableSettings" [footerValues]="section.footer" [title]="'Administrar'" [data]="section.items" [hideActions]="eventService.isEventCompleted$()" />
 </div>
 } @for(section of adminSections(); track section._id) {
 <div class="mt-5 card">
     <div class="font-semibold text-xl mb-4">{{section.name}}</div>
-    <app-table [parentId]="section._id" [tableSettings]="tableAdminSettings" [footerValues]="section.footer" [title]="'Administrar'" [data]="section.items" />
+    <app-table [parentId]="section._id" [tableSettings]="tableAdminSettings" [footerValues]="section.footer" [title]="'Administrar'" [data]="section.items" [hideActions]="eventService.isEventCompleted$()" />
 </div>
 }
 

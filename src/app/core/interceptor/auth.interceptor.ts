@@ -1,28 +1,33 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpContextToken, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth';
 import { LoadingService } from '../../shared/services/loading.service';
-import { catchError, finalize, of } from 'rxjs';
+import { catchError, finalize, from, of, switchMap } from 'rxjs';
+
+export const SKIP_LOADING = new HttpContextToken<boolean>(() => false);
 
 export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
     const authService = inject(AuthService);
     const loadingService = inject(LoadingService);
-    const token = authService.accessToken();
+    const skipLoading = req.context.get(SKIP_LOADING);
 
-    if (!token) return next(req);
+    if (!skipLoading) loadingService.show();
 
-    const authReq = req.clone({
-        setHeaders: {
-            Authorization: `Bearer ${token}`
-        }
-    });
+    return from(authService.sessionReady).pipe(
+        switchMap(() => {
+            const token = authService.accessToken();
+            const authReq = token
+                ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+                : req;
 
-    loadingService.show();
-
-    return next(authReq).pipe(
+            return next(authReq);
+        }),
         catchError((error) => {
-            loadingService.hide();
+            if (!skipLoading) loadingService.hide();
             return of(error);
         }),
-        finalize(() => loadingService.hide()));
+        finalize(() => {
+            if (!skipLoading) loadingService.hide();
+        })
+    );
 };

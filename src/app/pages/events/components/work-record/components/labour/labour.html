@@ -1,23 +1,93 @@
 <div class="card">
     <div class="font-semibold text-xl mb-4">Registro de Horas</div>
-    <p-toolbar styleClass="mb-6">
-        <ng-template #start>
-            <p-button label="Nuevo Registro" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew(null)" />
-        </ng-template>
-    </p-toolbar>
-    <app-table [parentId]="''" [tableSettings]="tableSettings" [footerValues]="footerValues()" [title]="'Administrar Horas'" [data]="hours()" />
+
+    @if (!employeesHours().length) {
+    <div class="relative overflow-hidden rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 via-sky-50 to-white shadow-sm p-8">
+        <div class="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-blue-200/40 blur-2xl"></div>
+        <div class="absolute -bottom-16 -left-10 w-48 h-48 rounded-full bg-sky-200/40 blur-2xl"></div>
+
+        <div class="relative flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
+            <div class="flex items-center justify-center w-14 h-14 rounded-full bg-blue-100 border border-blue-200 shrink-0">
+                <i class="pi pi-info-circle text-blue-600 text-2xl"></i>
+            </div>
+            <div class="flex flex-col">
+                <h3 class="font-semibold text-lg text-blue-900">Sin registros de horas</h3>
+                <p class="text-blue-800/80 mt-1">No se han registrado horas todavía para este evento.</p>
+            </div>
+        </div>
+    </div>
+    }
+
+    <p-accordion>
+        @for (emp of employeesHours(); track emp.employeeId) {
+        <p-accordion-panel [value]="emp.employeeId">
+            <p-accordion-header>
+                <ng-template #toggleicon let-active="active">
+                    @if (active) {
+                    <i class="pi pi-minus"></i>
+                    } @else {
+                    <i class="pi pi-plus"></i>
+                    }
+                </ng-template>
+
+                <div class="flex justify-between items-center gap-2 w-full">
+                    <div class="flex flex-col">
+                        <span class="font-bold whitespace-nowrap">{{ emp.employee }}</span>
+                        <span class="text-sm text-gray-500">CC: {{ emp.cc }}</span>
+                    </div>
+
+                    <div class="flex items-center gap-4 mr-4">
+                        <div class="hidden md:flex flex-col text-right">
+                            <span class="text-xs uppercase text-gray-500">Total Horas</span>
+                            <span class="font-semibold">{{ employeeTotalHours(emp) | number: '1.0-2' }}</span>
+                        </div>
+                        <div class="hidden md:flex flex-col text-right">
+                            <span class="text-xs uppercase text-gray-500">Total a Pagar</span>
+                            <span class="font-semibold">{{ employeeTotalAmount(emp) | currency: 'COP':'symbol':'1.0-0' }}</span>
+                        </div>
+                        @if(!eventService.isEventCompleted$()) {
+                        <p-button
+                            icon="pi pi-plus"
+                            label="Nuevo Registro"
+                            severity="secondary"
+                            size="small"
+                            (click)="openNewForEmployee(emp); $event.stopPropagation()"
+                        />
+                        }
+                    </div>
+                </div>
+            </p-accordion-header>
+            <p-accordion-content>
+                <app-employee-hours
+                    [employeeData]="emp"
+                    [hideActions]="eventService.isEventCompleted$()"
+                    (edit)="openEdit($event, emp)"
+                    (delete)="deleteItem($event, emp)"
+                    (approve)="setHourApproval($event, true)"
+                    (reject)="setHourApproval($event, false)"
+                />
+            </p-accordion-content>
+        </p-accordion-panel>
+        }
+    </p-accordion>
+
+    @if (employeesHours().length) {
+    <div class="mt-6 flex justify-end items-center gap-4 p-4 rounded-xl bg-gray-900 text-white">
+        <span class="text-sm uppercase tracking-wider text-gray-300">Total del Evento</span>
+        <span class="font-bold text-2xl">{{ eventTotal() | currency: 'COP':'symbol':'1.0-0' }}</span>
+    </div>
+    }
 </div>
 
-<p-dialog [(visible)]="timeDialog" [style]="{ width: '450px', height:'450px' }" [header]="detailTitle" [modal]="true">
+<p-dialog [(visible)]="timeDialog" [style]="{ width: '450px', height:'450px' }" [header]="detailTitle" [modal]="true" (onHide)="closeDialog()">
     <ng-template #content>
         <div class="flex flex-col gap-6">
             <form [formGroup]="form">
                 <div class="w-full">
                     <label for="name" class="block font-bold">Empleado</label>
                     <div class="flex flex-col w-full">
-                        <p-autocomplete formControlName="employee" (onSelect)="onSelectEmployee($event)" [suggestions]="employeeSearch" [dropdown]="true" optionLabel="name" (completeMethod)="search($event)" />
+                        <p-autocomplete formControlName="employee" [suggestions]="[]" [dropdown]="false" optionLabel="name" />
                     </div>
-                    <small class="text-red-500" *ngIf="form.get('employee')?.touched &&  form.get('employee')?.hasError('required')">Empleado es requerido.</small>
                 </div>
 
                 <div class="mt-2">
@@ -85,8 +155,40 @@
     </ng-template>
 
     <ng-template #footer>
-        <p-button label="Cancelar" icon="pi pi-times" text (click)="timeDialog = false" />
+        <p-button label="Cancelar" icon="pi pi-times" text (click)="closeDialog()" />
         <p-button label="Guardar" icon="pi pi-check" (click)="saveItem()" [disabled]="form.invalid" />
+    </ng-template>
+</p-dialog>
+
+<p-dialog
+    [(visible)]="rejectDialog"
+    [style]="{ width: '90vw', maxWidth: '480px' }"
+    [breakpoints]="{ '640px': '95vw' }"
+    header="Rechazar Hora"
+    [modal]="true"
+    (onHide)="closeRejectDialog()"
+>
+    <ng-template #content>
+        <div class="flex flex-col gap-4">
+            <p class="text-sm text-gray-600 m-0">Indica el motivo del rechazo. Esta observación quedará registrada en la hora.</p>
+            <div>
+                <label for="observations" class="block font-bold mb-2">Observaciones</label>
+                <textarea
+                    id="observations"
+                    pTextarea
+                    [(ngModel)]="rejectObservations"
+                    rows="4"
+                    maxlength="300"
+                    placeholder="Motivo del rechazo"
+                    class="w-full"
+                ></textarea>
+            </div>
+        </div>
+    </ng-template>
+
+    <ng-template #footer>
+        <p-button label="Cancelar" icon="pi pi-times" text (click)="closeRejectDialog()" />
+        <p-button label="Rechazar" icon="pi pi-check" severity="danger" (click)="confirmReject()" [disabled]="!rejectObservations.trim()" />
     </ng-template>
 </p-dialog>
 

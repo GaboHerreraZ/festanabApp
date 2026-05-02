@@ -13,6 +13,9 @@ interface TableAction {
     id: string;
     icon: string;
     action: (rowData: any) => void;
+    tooltip?: string;
+    severity?: 'primary' | 'secondary' | 'success' | 'info' | 'warn' | 'help' | 'danger' | 'contrast';
+    hide?: (item: any) => boolean;
 }
 
 export interface TableSettings {

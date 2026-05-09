@@ -80,7 +80,12 @@ export class Events {
 
     destroy$ = new Subject<void>();
 
-    refresh$ = new BehaviorSubject<string>('inQuote');
+    selectedStatus: string | null = 'inQuote';
+    searchValue: string = '';
+
+    refresh$ = new BehaviorSubject<{ status?: string; search?: string }>({ status: 'inQuote' });
+
+    private searchInput$ = new Subject<string>();
 
     private searchTerm$ = new Subject<string>();
 
@@ -93,8 +98,8 @@ export class Events {
     suggestionsSignal = toSignal(this.suggestions$, { initialValue: [] });
 
     events$ = this.refresh$.pipe(
-        switchMap((status: string) =>
-            this.eventService.getAllEvents(status).pipe(
+        switchMap((filters) =>
+            this.eventService.getAllEvents(filters).pipe(
                 takeUntil(this.destroy$),
                 map((res: any) => res.data),
                 map((res: any) =>
@@ -210,6 +215,12 @@ export class Events {
 
     constructor(private fb: FormBuilder) {
         this.loadData();
+        this.searchInput$
+            .pipe(debounceTime(400), distinctUntilChanged(), takeUntil(this.destroy$))
+            .subscribe((value) => {
+                this.searchValue = value;
+                this.emitFilters();
+            });
     }
 
     ngOnDestroy(): void {
@@ -218,8 +229,25 @@ export class Events {
     }
 
     onFilterEvents(event: any) {
-        console.log(event);
-        this.refresh$.next(event.value);
+        this.selectedStatus = event.value ?? null;
+        this.emitFilters();
+    }
+
+    onSearch(value: string) {
+        this.searchInput$.next(value ?? '');
+    }
+
+    clearFilters() {
+        this.selectedStatus = null;
+        this.searchValue = '';
+        this.emitFilters();
+    }
+
+    private emitFilters() {
+        this.refresh$.next({
+            status: this.selectedStatus ?? undefined,
+            search: this.searchValue || undefined
+        });
     }
 
     onSelectCustomer(customer: AutoCompleteSelectEvent) {

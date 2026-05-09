@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Table as TablePrime, TableModule } from 'primeng/table';
 import { FooterValues, TableSettings } from '../../../core/models/table-setting';
 import { CommonModule } from '@angular/common';
@@ -31,10 +31,17 @@ export class Table {
 
     @Input() hideActions: boolean = false;
 
-
+    @Output() search = new EventEmitter<string>();
 
     onGlobalFilter(table: TablePrime, event: Event) {
-        table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+        const value = (event.target as HTMLInputElement).value;
+
+        if (this.search.observed) {
+            this.search.emit(value);
+            return;
+        }
+
+        table.filterGlobal(value, 'contains');
     }
 
     getSeverity(rowData: any): string {

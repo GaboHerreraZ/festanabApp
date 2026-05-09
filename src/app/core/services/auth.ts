@@ -36,7 +36,8 @@ export class AuthService {
 
     readonly accessToken = computed(() => this._token());
 
-    logout() {
-        supabase.auth.signOut();
+    async logout() {
+        await supabase.auth.signOut();
+        this._token.set(null);
     }
 }

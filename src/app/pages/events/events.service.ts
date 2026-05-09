@@ -22,8 +22,11 @@ export class EventsService {
 
     apiService = inject(ApiService);
 
-    getAllEvents(status: string) {
-        return this.apiService.get<Event[]>(`${this.PATH}/get-events/${status}`);
+    getAllEvents(filters: { status?: string; search?: string } = {}) {
+        const params: Record<string, string> = {};
+        if (filters.status) params['status'] = filters.status;
+        if (filters.search?.trim()) params['search'] = filters.search.trim();
+        return this.apiService.get<Event[]>(`${this.PATH}/get-events`, params);
     }
 
     getEvent(id: string) {

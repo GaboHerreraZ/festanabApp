@@ -6,10 +6,19 @@
     <p-toolbar styleClass="mb-6">
         <ng-template #start>
             <p-button label="Agregar Evento" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
-            <p-select (onChange)="onFilterEvents($event)" [options]="eventStatus" optionLabel="value" optionValue="key" placeholder="Filtrar Por" class="w-full md:w-56 mr-2" />
+            <p-select
+                (onChange)="onFilterEvents($event)"
+                [(ngModel)]="selectedStatus"
+                [options]="eventStatus"
+                optionLabel="value"
+                optionValue="key"
+                placeholder="Filtrar Por"
+                class="w-full md:w-56 mr-2"
+            />
+            <p-button label="Limpiar filtros" icon="pi pi-filter-slash" severity="contrast" [outlined]="true" (onClick)="clearFilters()" />
         </ng-template>
     </p-toolbar>
-    <app-table [parentId]="''" [tableSettings]="tableSettings" [title]="'Administrar Eventos'" [data]="lEvents" />
+    <app-table [parentId]="''" [tableSettings]="tableSettings" [title]="'Administrar Eventos'" [data]="lEvents" (search)="onSearch($event)" />
 </div>
 
 <p-dialog [(visible)]="eventDialog" [style]="{ width: '450px' }" header="Detalle del Evento" [modal]="true">

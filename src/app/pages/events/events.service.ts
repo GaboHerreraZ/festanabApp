@@ -121,6 +121,10 @@ export class EventsService {
         return this.apiService.delete(`${this.PATH}/delete-event-employee/${id}`);
     }
 
+    debugClassifyHours(payload: { startTime: string; endTime: string; hourPrice: number }) {
+        return this.apiService.post(`${this.PATH}/debug-classify-hours`, payload);
+    }
+
     editSectionDescription(eventId: string, sectionId: string, description: string) {
         return this.apiService.post(`${this.PATH}/edit-section`, { eventId, sectionId, description });
     }

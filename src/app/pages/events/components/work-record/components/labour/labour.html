@@ -100,27 +100,21 @@
                     <p-inputnumber id="price" [disabled]="true" formControlName="hourPrice" mode="currency" [minFractionDigits]="0" currency="COP" fluid />
                 </div>
 
-                <div class="mt-2">
-                    <label for="date" class="block font-bold">Fecha</label>
-                    <p-datepicker formControlName="date" [showIcon]="true" [appendTo]="'body'" inputId="buttondisplay" [showOnFocus]="false" />
-                </div>
-
                 <div class="grid grid-cols-12 gap-4 mt-2">
-                    <div class="col-span-6">
+                    <div class="col-span-12 md:col-span-6">
                         <label for="startTime" class="block font-bold">Hora Inicio</label>
                         <p-datepicker
                             class="w-full"
                             formControlName="startTime"
                             [appendTo]="'body'"
+                            [showTime]="true"
                             hourFormat="12"
+                            dateFormat="dd M yy"
+                            [stepMinute]="15"
+                            [maxDate]="today"
                             [iconDisplay]="'input'"
                             [showIcon]="true"
-                            [minDate]="minDateSignal()"
-                            [maxDate]="maxDateSignal()"
-                            id="time"
-                            [timeOnly]="true"
-                            [baseZIndex]="1000"
-                            inputId="templatedisplay"
+                            inputId="startTime"
                         >
                             <ng-template #inputicon let-clickCallBack="clickCallBack">
                                 <i class="pi pi-clock" (click)="clickCallBack($event)"></i>
@@ -128,25 +122,26 @@
                         </p-datepicker>
                         <small class="text-red-500" *ngIf="form.get('startTime')?.touched &&  form.get('startTime')?.hasError('required')">Hora de Inicio requerida.</small>
                     </div>
-                    <div class="col-span-6">
+                    <div class="col-span-12 md:col-span-6">
                         <label for="endTime" class="block font-bold">Hora Fin</label>
                         <p-datepicker
                             class="w-full"
-                            [minDate]="minDateSignal()"
-                            [maxDate]="maxDateSignal()"
                             formControlName="endTime"
                             [appendTo]="'body'"
+                            [showTime]="true"
                             hourFormat="12"
+                            dateFormat="dd M yy"
+                            [stepMinute]="15"
+                            [maxDate]="today"
                             [iconDisplay]="'input'"
                             [showIcon]="true"
-                            id="endTime"
-                            [timeOnly]="true"
-                            inputId="templatedisplay"
+                            inputId="endTime"
                         >
                             <ng-template #inputicon let-clickCallBack="clickCallBack">
                                 <i class="pi pi-clock" (click)="clickCallBack($event)"></i>
                             </ng-template>
                         </p-datepicker>
+                        <small class="text-red-500" *ngIf="form.get('endTime')?.touched &&  form.get('endTime')?.hasError('required')">Hora Fin requerida.</small>
                         <small class="text-red-500" *ngIf="form?.errors?.['startAfterEnd'] && form?.touched">Hora Fin debe ser mayor a la hora de inicio.</small>
                     </div>
                 </div>

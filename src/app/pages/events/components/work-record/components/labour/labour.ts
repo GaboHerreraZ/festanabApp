@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input, OnDestroy, Signal, signal } from '@angular/core';
+import { Component, computed, inject, input, OnDestroy } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
@@ -70,29 +70,17 @@ export class Labour implements OnDestroy {
 
     timeDialog: boolean = false;
 
+    today: Date = (() => {
+        const d = new Date();
+        d.setHours(23, 59, 59, 999);
+        return d;
+    })();
+
     rejectDialog: boolean = false;
     rejectObservations: string = '';
     private rejectTarget: IHour | null = null;
 
     eventId$ = toObservable(this.eventId);
-
-    dateSignal!: Signal<Date | null>;
-
-    minDateSignal = computed(() => {
-        const date = this.dateSignal();
-        if (!date) return null;
-        const d = new Date(date);
-        d.setHours(0, 0, 0, 0);
-        return d;
-    });
-
-    maxDateSignal = computed(() => {
-        const date = this.dateSignal();
-        if (!date) return null;
-        const d = new Date(date);
-        d.setHours(23, 59, 59, 999);
-        return d;
-    });
 
     employeesHours$ = this.refresh$.pipe(
         switchMap(() =>
@@ -111,24 +99,6 @@ export class Labour implements OnDestroy {
 
     constructor(private fb: FormBuilder) {
         this.setForm();
-
-        effect(() => {
-            const newDate = this.dateSignal();
-            if (!newDate) return;
-
-            const start = this.form.get('startTime')!.value;
-            const end = this.form.get('endTime')!.value;
-
-            if (start) {
-                const updatedStart = this.mergeDateAndTime(newDate, start);
-                this.form.get('startTime')!.setValue(updatedStart, { emitEvent: false });
-            }
-
-            if (end) {
-                const updatedEnd = this.mergeDateAndTime(newDate, end);
-                this.form.get('endTime')!.setValue(updatedEnd, { emitEvent: false });
-            }
-        });
     }
 
     ngOnDestroy(): void {
@@ -173,7 +143,6 @@ export class Labour implements OnDestroy {
         this.form.patchValue({
             ...item,
             employee: { name: emp.employee, cc: emp.cc },
-            date: new Date(item.date),
             startTime: new Date(item.startTime),
             endTime: item.endTime ? new Date(item.endTime) : null
         });
@@ -264,12 +233,21 @@ export class Labour implements OnDestroy {
     saveItem() {
         let { _id, ...res } = this.form.getRawValue();
 
+        const raw = this.form.getRawValue();
+        const employeeName = typeof raw.employee === 'object' && raw.employee !== null ? raw.employee.name : raw.employee;
+
+        const startDate = raw.startTime ? new Date(raw.startTime) : new Date();
+        const dateOnly = new Date(startDate);
+        dateOnly.setHours(0, 0, 0, 0);
+
         const item: IHour = {
-            ...this.form.getRawValue(),
+            ...raw,
+            employee: employeeName,
+            date: dateOnly,
             eventId: this.eventId()
         };
 
-        const hasHour = this.employeeHasAuxTransportInDate(res.employeeId, res.date, _id);
+        const hasHour = this.employeeHasAuxTransportInDate(res.employeeId, dateOnly, _id);
 
         if (!_id) {
             this.eventService
@@ -320,24 +298,28 @@ export class Labour implements OnDestroy {
     }
 
     private resetForm() {
-        const todayAt6AM = new Date();
-        todayAt6AM.setHours(6, 0, 0, 0);
-        this.form.reset({ date: new Date(), startTime: todayAt6AM, endTime: todayAt6AM, eventId: this.eventId() });
+        const start = new Date();
+        start.setHours(6, 0, 0, 0);
+        const end = new Date();
+        end.setHours(7, 0, 0, 0);
+        this.form.reset({ startTime: start, endTime: end, eventId: this.eventId() });
         this.form.get('employee')!.enable({ emitEvent: false });
     }
 
     private setForm() {
-        const todayAt6AM = new Date();
-        todayAt6AM.setHours(6, 0, 0, 0);
+        const start = new Date();
+        start.setHours(6, 0, 0, 0);
+        const end = new Date();
+        end.setHours(7, 0, 0, 0);
+
         this.form = this.fb.group(
             {
                 _id: [''],
                 employee: ['', Validators.required],
                 cc: [{ value: '', disabled: true }],
                 hourPrice: [{ value: '', disabled: true }],
-                date: [new Date()],
-                startTime: [todayAt6AM, Validators.required],
-                endTime: [todayAt6AM],
+                startTime: [start, Validators.required],
+                endTime: [end, Validators.required],
                 employeeId: [''],
                 eventId: [this.eventId()],
                 hrsOrd: [0],
@@ -361,12 +343,6 @@ export class Labour implements OnDestroy {
             },
             { validators: this.startBeforeEndValidator }
         );
-
-        const dateCtrl = this.form.get('date')!;
-
-        this.dateSignal = toSignal(dateCtrl.valueChanges, {
-            initialValue: dateCtrl.value
-        });
     }
 
     private startBeforeEndValidator: ValidatorFn = (group: AbstractControl): ValidationErrors | null => {
@@ -380,17 +356,6 @@ export class Labour implements OnDestroy {
 
         return startTime > endTime ? { startAfterEnd: true } : null;
     };
-
-    private mergeDateAndTime(date: Date, time: Date): Date {
-        const d = new Date(date);
-
-        d.setHours(time.getHours());
-        d.setMinutes(time.getMinutes());
-        d.setSeconds(0);
-        d.setMilliseconds(0);
-
-        return d;
-    }
 
     private employeeHasAuxTransportInDate(employeeId: string, date: string | Date, currentRecordId?: string): boolean {
         const target = new Date(date);

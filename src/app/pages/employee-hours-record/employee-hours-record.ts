@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, effect, inject, OnDestroy, Signal, signal } from '@angular/core';
+import { Component, inject, OnDestroy, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -13,7 +13,6 @@ import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { Subject, takeUntil } from 'rxjs';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { EventsService } from '../events/events.service';
 import { IEmployeeEvent, IEmployeeEventHour } from '../../core/models/hour';
 
@@ -62,41 +61,9 @@ export class EmployeeHoursRecord implements OnDestroy {
     selectedEvent: IEmployeeEvent | null = null;
     editingHourId: string | null = null;
     form!: FormGroup;
-    dateSignal!: Signal<Date | null>;
-
-    minDateSignal = computed(() => {
-        const date = this.dateSignal();
-        if (!date) return null;
-        const d = new Date(date);
-        d.setHours(0, 0, 0, 0);
-        return d;
-    });
-
-    maxDateSignal = computed(() => {
-        const date = this.dateSignal();
-        if (!date) return null;
-        const d = new Date(date);
-        d.setHours(23, 59, 59, 999);
-        return d;
-    });
 
     constructor() {
         this.setForm();
-
-        effect(() => {
-            const newDate = this.dateSignal();
-            if (!newDate) return;
-
-            const start = this.form.get('startTime')!.value;
-            const end = this.form.get('endTime')!.value;
-
-            if (start) {
-                this.form.get('startTime')!.setValue(this.mergeDateAndTime(newDate, start), { emitEvent: false });
-            }
-            if (end) {
-                this.form.get('endTime')!.setValue(this.mergeDateAndTime(newDate, end), { emitEvent: false });
-            }
-        });
     }
 
     search() {
@@ -182,10 +149,7 @@ export class EmployeeHoursRecord implements OnDestroy {
         this.selectedEvent = ev;
         this.editingHourId = hour._id ?? (hour as any).id ?? null;
         this.dialogTitle = 'Editar Horas';
-        const baseDate = hour.startTime ? new Date(hour.startTime) : new Date(ev.date);
-        baseDate.setHours(0, 0, 0, 0);
         this.form.reset({
-            date: baseDate,
             startTime: hour.startTime ? new Date(hour.startTime) : null,
             endTime: hour.endTime ? new Date(hour.endTime) : null
         });
@@ -249,7 +213,11 @@ export class EmployeeHoursRecord implements OnDestroy {
             return;
         }
 
-        const hasHour = this.employeeHasAuxTransportInDate(ev, raw.date);
+        const startDate = raw.startTime ? new Date(raw.startTime) : new Date();
+        const dateOnly = new Date(startDate);
+        dateOnly.setHours(0, 0, 0, 0);
+
+        const hasHour = this.employeeHasAuxTransportInDate(ev, dateOnly);
 
         const payload: any = {
             eventId: ev.eventId,
@@ -257,7 +225,7 @@ export class EmployeeHoursRecord implements OnDestroy {
             employee: ev.employee,
             cc: ev.cc,
             hourPrice: ev.hourPrice ?? 0,
-            date: raw.date,
+            date: dateOnly,
             startTime: raw.startTime,
             endTime: raw.endTime,
             hasHour
@@ -297,30 +265,26 @@ export class EmployeeHoursRecord implements OnDestroy {
     }
 
     private setForm() {
-        const todayAt6AM = new Date();
-        todayAt6AM.setHours(6, 0, 0, 0);
+        const start = new Date();
+        start.setHours(6, 0, 0, 0);
+        const end = new Date();
+        end.setHours(7, 0, 0, 0);
 
         this.form = this.fb.group(
             {
-                date: [new Date()],
-                startTime: [todayAt6AM, Validators.required],
-                endTime: [todayAt6AM, Validators.required]
+                startTime: [start, Validators.required],
+                endTime: [end, Validators.required]
             },
             { validators: this.startBeforeEndValidator }
         );
-
-        const dateCtrl = this.form.get('date')!;
-        this.dateSignal = toSignal(dateCtrl.valueChanges, { initialValue: dateCtrl.value });
     }
 
     private resetForm(_ev: IEmployeeEvent) {
-        const baseDate = new Date();
-        baseDate.setHours(0, 0, 0, 0);
-        const start = new Date(baseDate);
+        const start = new Date();
         start.setHours(6, 0, 0, 0);
-        const end = new Date(baseDate);
+        const end = new Date();
         end.setHours(7, 0, 0, 0);
-        this.form.reset({ date: baseDate, startTime: start, endTime: end });
+        this.form.reset({ startTime: start, endTime: end });
     }
 
     private startBeforeEndValidator: ValidatorFn = (group: AbstractControl): ValidationErrors | null => {
@@ -330,14 +294,6 @@ export class EmployeeHoursRecord implements OnDestroy {
         return new Date(start).getTime() > new Date(end).getTime() ? { startAfterEnd: true } : null;
     };
 
-    private mergeDateAndTime(date: Date, time: Date): Date {
-        const d = new Date(date);
-        d.setHours(time.getHours());
-        d.setMinutes(time.getMinutes());
-        d.setSeconds(0);
-        d.setMilliseconds(0);
-        return d;
-    }
 
     private hasOverlap(ev: IEmployeeEvent, start: Date | string, end: Date | string): boolean {
         const newStart = new Date(start).getTime();

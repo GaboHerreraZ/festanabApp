@@ -1,0 +1,21 @@
+<div class="w-full max-w-6xl mx-auto mt-6 md:mt-10 px-3 md:px-6 lg:px-10 py-3 md:py-4">
+    <div class="flex items-center gap-3 mb-5">
+        <div class="h-10 w-1 bg-black rounded-full"></div>
+        <h2 class="font-bold text-2xl md:text-3xl text-gray-900 tracking-tight">Debug</h2>
+    </div>
+
+    <p-tabs value="hours-calculator" class="overflow-x-auto whitespace-nowrap lg:whitespace-normal">
+        <p-tablist class="flex lg:flex-wrap gap-2 min-w-max">
+            @for (tab of tabs; track tab.route) {
+            <p-tab [value]="tab.route" [routerLink]="tab.route" class="flex items-center gap-1 px-3 py-2 text-sm whitespace-nowrap">
+                <i [class]="tab.icon"></i>
+                <span>{{ tab.label }}</span>
+            </p-tab>
+            }
+        </p-tablist>
+    </p-tabs>
+
+    <div class="mt-6">
+        <router-outlet />
+    </div>
+</div>

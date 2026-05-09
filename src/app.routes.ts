@@ -7,6 +7,8 @@ import { AuthGuard } from './app/core/guard/auth.guard';
 import { CustomerQuotation } from './app/pages/customer-quotation/customer-quotation';
 import { EmployeeBilling } from './app/pages/employee-billing/employee-billing';
 import { EmployeeHoursRecord } from './app/pages/employee-hours-record/employee-hours-record';
+import { Debug } from './app/pages/debug/debug';
+import { HoursCalculator } from './app/pages/debug/hours-calculator/hours-calculator';
 
 export const appRoutes: Routes = [
     {
@@ -24,6 +26,14 @@ export const appRoutes: Routes = [
     },
     { path: 'customer-quotation/:id', component: CustomerQuotation },
     { path: 'employee-hours-record', component: EmployeeHoursRecord },
+    {
+        path: 'debug',
+        component: Debug,
+        children: [
+            { path: '', redirectTo: 'hours-calculator', pathMatch: 'full' },
+            { path: 'hours-calculator', component: HoursCalculator }
+        ]
+    },
     {
         path: 'employee-billing/:eventId/:employeeId',
         component: EmployeeBilling

@@ -1,0 +1,95 @@
+<div class="flex flex-col items-center w-full gap-5 md:gap-6">
+
+    <div class="card w-full max-w-2xl relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-700 via-black to-gray-700"></div>
+
+        <div class="flex items-center gap-3 mb-5">
+            <div class="h-10 w-1 bg-black rounded-full"></div>
+            <h2 class="font-bold text-xl md:text-2xl text-gray-900 tracking-tight">Cálculo de Horas</h2>
+        </div>
+
+        <form [formGroup]="form" class="flex flex-col gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="startTime" class="block font-bold mb-2">Hora Inicio</label>
+                    <p-datepicker
+                        id="startTime"
+                        formControlName="startTime"
+                        [showTime]="true"
+                        hourFormat="12"
+                        dateFormat="dd/mm/yy"
+                        [stepMinute]="15"
+                        [maxDate]="today"
+                        [showIcon]="true"
+                        [iconDisplay]="'input'"
+                        [appendTo]="'body'"
+                        inputId="startTime"
+                        styleClass="w-full"
+                    />
+                </div>
+                <div>
+                    <label for="endTime" class="block font-bold mb-2">Hora Fin</label>
+                    <p-datepicker
+                        id="endTime"
+                        formControlName="endTime"
+                        [showTime]="true"
+                        hourFormat="12"
+                        dateFormat="dd/mm/yy"
+                        [stepMinute]="15"
+                        [maxDate]="today"
+                        [showIcon]="true"
+                        [iconDisplay]="'input'"
+                        [appendTo]="'body'"
+                        inputId="endTime"
+                        styleClass="w-full"
+                    />
+                </div>
+            </div>
+
+            <div>
+                <label for="hourPrice" class="block font-bold mb-2">Precio Hora</label>
+                <p-inputnumber
+                    id="hourPrice"
+                    formControlName="hourPrice"
+                    mode="currency"
+                    currency="COP"
+                    [minFractionDigits]="0"
+                    fluid
+                />
+            </div>
+
+            <div class="flex justify-end mt-2">
+                <p-button label="Calcular" icon="pi pi-calculator" [loading]="loading()" (onClick)="calculate()" />
+            </div>
+        </form>
+    </div>
+
+    @if (result()) {
+    <div class="card w-full max-w-4xl">
+        <div class="flex items-center gap-3 mb-5">
+            <i class="pi pi-list text-black text-2xl"></i>
+            <h3 class="font-bold text-xl md:text-2xl text-gray-900">Resultado</h3>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            @for (row of result(); track row.label) {
+            <div class="rounded-xl border border-gray-200 bg-gray-50 p-3 flex flex-col">
+                <span class="text-xs uppercase tracking-wide text-gray-500 mb-1">{{ row.label }}</span>
+                @if (row.type === 'currency') {
+                <span class="font-bold text-base text-gray-900">{{ row.value | currency: 'COP':'symbol':'1.0-0' }}</span>
+                } @else {
+                <span class="font-bold text-base text-gray-900">{{ row.value | number: '1.0-2' }}</span>
+                }
+            </div>
+            }
+        </div>
+
+        <div class="mt-5 flex justify-between items-center bg-black text-white rounded-xl p-4">
+            <span class="text-sm uppercase tracking-wider text-gray-300">Total a Pagar</span>
+            <span class="font-bold text-2xl">{{ total() | currency: 'COP':'symbol':'1.0-0' }}</span>
+        </div>
+    </div>
+    }
+</div>
+
+<p-toast />

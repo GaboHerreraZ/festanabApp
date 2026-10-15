@@ -4,6 +4,7 @@
     <p-toolbar styleClass="mb-6">
         <ng-template #start>
             <p-button label="Nuevo producto" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+            <p-button label="Exportar" icon="pi pi-file-excel" severity="success" class="mr-2" [disabled]="!products().length" (onClick)="exportExcel()" />
         </ng-template>
     </p-toolbar>
 

@@ -16,6 +16,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { Column } from '../../core/models/column';
 import { Product } from '../../core/models/product';
 import { TextareaModule } from 'primeng/textarea';
+import { exportInventoryToExcel } from '../../shared/utils/export-inventory';
 
 @Component({
     selector: 'app-inventory',
@@ -97,6 +98,14 @@ export class Inventory implements OnInit, OnDestroy {
                 this.product = {};
             }
         });
+    }
+
+    async exportExcel() {
+        try {
+            await exportInventoryToExcel(this.products());
+        } catch {
+            this.service.add({ severity: 'error', summary: 'Error', detail: 'No se pudo exportar el inventario.' });
+        }
     }
 
     editProduct(product: Product) {
